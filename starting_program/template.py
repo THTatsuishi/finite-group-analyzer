@@ -5,6 +5,7 @@ import sys
 import numpy
 sys.path.append('../')
 from application.calc import matcal
+from application.controller import ConsoleController
 ############
 ############ 以降を編集する
 ############ ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
@@ -47,7 +48,9 @@ maximal = 2000
 zero_base = 0.0001
 
 matlist = [matcal.ComplexSquareMatrix(i) for i in generators]
-result = matcal.generate_group(matlist, zero_base, maximal)
+app_ctrl = ConsoleController()
+result = matcal.generate_group(matlist, zero_base, maximal, app_ctrl)
+
 
 
 

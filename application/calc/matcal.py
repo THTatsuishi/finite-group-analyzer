@@ -1,7 +1,11 @@
 """
 行列計算用のモジュール。
 """
+import itertools
 import numpy
+import sys
+sys.path.append('../')
+from application.controller import Controller, NullController
 
 def are_equal(a:complex, b:complex, zero_base:float) -> bool:
     """
@@ -32,6 +36,7 @@ def are_equal(a:complex, b:complex, zero_base:float) -> bool:
 
 def generate_group(
         matlist: 'list[ComplexSquareMatrix]', zero_base: float, maximal: int,
+        controller: 'Controller' = None
         ) -> 'GenerateGroupResult':
     """
     指定の生成元のリストから群を生成する。
@@ -51,43 +56,44 @@ def generate_group(
     maximal : int
         群の要素の最大値。
         生成された群の要素数がこの値を超えた場合、有限では閉じないものと判定する。
-    * : TYPE
-        DESCRIPTION.
-    logger : Logger, optional
-        DESCRIPTION. The default is matcal_logger.
+    controller : 'Controller'
+        コントローラー。The default is None.
 
     Returns
     -------
-    'GenerateGroupResult'
+    GenerateGroupResult
         生成結果を表すクラス。
 
     """
+    cntl = (controller if controller is not None
+            else NullController())
+    n_mat = len(matlist)
+    cntl.calc_progress("%d個の生成元から群の生成を開始" % n_mat)
     # 許容誤差が負ならば失敗
     # 一致判定で常に不一致とされて、無限に生成されるため
     if zero_base < 0:
-#        logger.info("失敗：許容誤差が負の値である")
-        return GenerateGroupResult()
-    n_mat = len(matlist)
-#    logger.info("%d個の生成元から群の生成を開始" % n_mat)
+        cntl.calc_progress("失敗：許容誤差が負の値である")
+        return GenerateGroupResult()   
     # 生成元が0個ならば失敗
     if n_mat == 0:
-#        logger.info("失敗：生成元の個数が0である")
+        cntl.calc_progress("失敗：生成元の個数が0である")
         return GenerateGroupResult()
     order = matlist[0].order
     # 生成元の次元が合っていなければ失敗
     if any(i.order != order for i in matlist):
-#        logger.info("失敗：生成元の次元が合っていない")
+        cntl.calc_progress("失敗：生成元の次元が合っていない")
         return GenerateGroupResult()
     # 生成元に行列式の絶対値が1でないものが含まれていたら失敗
     # 有限で閉じないため
-    if any(i.has_unit_determinant(zero_base) for i in matlist):
-#        logger.info("失敗：生成元に行列式の絶対値が1でないものが含まれている")
+    if any(not i.has_unit_determinant(zero_base) for i in matlist):
+        cntl.calc_progress(
+            "失敗：生成元に行列式の絶対値が1でないものが含まれている")
         return GenerateGroupResult()
     # 生成元の整理：単位元の除外、重複削除
     gen_list = []
     identity = ComplexSquareMatrix.identity(order)
     for i in matlist:
-        if(i.equal_to(identity,zero_base)):
+        if i.equal_to(identity,zero_base):
             continue
         if i.is_included(gen_list,zero_base):
             continue
@@ -100,24 +106,24 @@ def generate_group(
     n_loop= 0
     while len(element_prev) != 0:
         if n_all > maximal:
-#            logger.info("失敗：要素数が最大値(%d)を超えても群が閉じない" % maximal)
+            cntl.calc_progress(
+                "失敗：要素数が最大値(%d)を超えても群が閉じない" % maximal)
             return GenerateGroupResult()
         n_loop += 1
-#        logger.info("-- loop(%d): 要素数(%d)" % (n_loop,n_all))
+        cntl.calc_progress("-- loop(%d): 要素数(%d)" % (n_loop,n_all))
         # 新しい行列を生成
-        new_list = [mat1.dot(mat2) 
-                          for mat1, mat2 in zip(element_prev,gen_list)]
+        new_list = [mat1.dot(mat2) for (mat1, mat2) 
+                    in itertools.product(element_prev,gen_list)]
         # 生成されたものが既存の行列と被っていなければリストに追加
         for i in new_list:
-            if i.is_included(element_all,zero_base):
-                continue
-            element_new.append(i)
-            element_all.append(i)
+            if not i.is_included(element_all,zero_base):
+                element_new.append(i)
+                element_all.append(i)
         # 情報を更新
         n_all += len(element_new)
         element_prev = element_new[:]
         element_new = []
-#    logger.info("生成完了")
+    cntl.calc_progress("生成完了：位数(%d)" % n_all)
     return GenerateGroupResult(element_all)
 
 class ComplexSquareMatrix(object):
@@ -159,7 +165,7 @@ class ComplexSquareMatrix(object):
 
         Returns
         -------
-        'ComplexSquareMatrix'
+        ComplexSquareMatrix
             単位行列。
 
         """
@@ -177,7 +183,7 @@ class ComplexSquareMatrix(object):
 
         Returns
         -------
-        'ComplexSquareMatrix'
+        ComplexSquareMatrix
             演算結果の複素正方行列。
 
         """
@@ -284,5 +290,5 @@ class GenerateGroupResult(object):
         None.
 
         """
-        self.has_value = True if csmatlist != None else False
+        self.has_value = True if csmatlist is not None else False
         self.value = csmatlist
