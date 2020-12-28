@@ -1,3 +1,6 @@
+"""
+有限群解析プログラムの起点ファイル
+"""
 import sys
 import numpy
 sys.path.append('../')
@@ -45,6 +48,7 @@ zero_base = 0.0001
 
 matlist = [matcal.ComplexSquareMatrix(i) for i in generators]
 result = matcal.generate_group(matlist, zero_base, maximal)
+
 
 
 
