@@ -1,0 +1,50 @@
+\documentclass[11pt, a4paper]{jsarticle}
+%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%
+%\usepackage{--}
+\usepackage{amsmath,ascmac,amssymb}
+\usepackage{bm}				%\bm{--}
+\usepackage{braket}			%\braket{--|--}
+\usepackage{comment}			%\begin{comment}--\end{comment}
+\usepackage{mathrsfs}			%\mathscr{--}
+\usepackage{ulem}				%underline
+
+\usepackage{layout}			%\layout
+\usepackage[dvipdfmx]{graphicx}
+\usepackage{epsfig}
+\usepackage{color}
+\newcommand{\Comment}[1]{\textcolor{red}{[[#1]]}}		%\Comment{--} -> [[--]]
+\newcommand{\im}[1]{\text{Im}#1}
+\newcommand{\re}[1]{\text{Re}#1}
+%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%
+\title{
+有限群解析プログラムの説明書
+}
+\author{
+作成者: 立石卓也
+}
+
+\begin{document}
+\newcommand{\Slash}[1]{{\ooalign{\hfil/\hfil\crcr$#1$}}}		%\Slash{--}
+%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%
+\maketitle
+%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%
+\section{コマンド一覧}
+解析画面で用いるコマンドを記す.
+全てのコマンドは「コマンド名[引数]」となっている.
+
+
+\paragraph{Element[group]}
+``group''の要素を表示する.
+
+\paragraph{Table[group]}
+``group''の乗積表を表示する.
+ただし, 位数が大きい場合には一部のみを表示する.
+
+\paragraph{ConjugacyClass[group]}
+``group''の共役類を「位数 要素数 [要素の一覧]」として表示する.
+
+
+
+
+%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%
+\end{document}
