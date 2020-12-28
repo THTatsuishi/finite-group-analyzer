@@ -1,5 +1,7 @@
+import sys
 import numpy
-from modules.calc import matcal
+sys.path.append('../')
+from application.calc import matcal
 ############
 ############ 以降を編集する
 ############ ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
@@ -43,5 +45,8 @@ zero_base = 0.0001
 
 matlist = [matcal.ComplexSquareMatrix(i) for i in generators]
 result = matcal.generate_group(matlist, zero_base, maximal)
+
+
+
 
 
