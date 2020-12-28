@@ -7,16 +7,14 @@ import sys
 sys.path.append('../')
 from application.controller import Controller, NullController
 
-def are_equal(a:complex, b:complex, zero_base:float) -> bool:
+def is_zero_num(num: complex, zero_base: float) -> bool:
     """
-    許容誤差の範囲で二つの複素数が一致しているとみなせるか判定する。
+    指定の複素数が許容誤差の範囲で0であるか判定する。
 
     Parameters
     ----------
-    a : complex
-        一つ目の複素数。
-    b : complex
-        二つ目の複素数。
+    num : complex
+        複素数。
     zero_base : float
         許容誤差。
 
@@ -24,18 +22,96 @@ def are_equal(a:complex, b:complex, zero_base:float) -> bool:
     -------
     bool
         True:
-            (a-b)の実部の絶対値と虚部の絶対値がともにzero_base以下である。 
+            numの実部の絶対値と虚部の絶対値がともにzero_base以下である。 
         False:
-            (a-b)の実部の絶対値がzero_baseより大きい。
-            (a-b)の虚部の絶対値がzero_baseより大きい。
+            numの実部の絶対値がzero_baseより大きい。
+            numの虚部の絶対値がzero_baseより大きい。
             許容誤差が負である。         
 
     """
-    delta = a - b
-    return abs(delta.real) <= zero_base and abs(delta.imag) <= zero_base
+    return abs(num.real) <= zero_base and abs(num.imag) <= zero_base
+
+def is_zero_mat(
+        mat: numpy.ndarray, zero_base: float
+        ) -> bool:
+    """
+    指定の行列が許容誤差の範囲でゼロ行列に一致するか判定する。
+
+    Parameters
+    ----------
+    mat : numpy.ndarray
+        複素正方行列。
+    zero_base : float
+        許容誤差。
+
+    Returns
+    -------
+    bool
+        True:
+            全ての要素が許容誤差の範囲で一致する。
+        False:
+            許容誤差の範囲で0でない要素が存在する。
+            許容誤差が負である。
+
+    """   
+    for row in mat:
+        for num in row:
+            if not is_zero_num(num,zero_base): return False
+    return True
+
+def is_mat_in_list(
+        mat: numpy.ndarray, matlist: 'list[numpy.ndarray]', zero_base: float
+        ) -> bool:
+    """
+    指定の行列が指定のリストの中に含まれているか判定する。
+    許容誤差の範囲で一致する行列が含まれているか判定する。
+
+    Parameters
+    ----------
+    mat : numpy.ndarray
+        複素行列。
+    matlist : list[numpy.ndarray]
+        複素行列のリスト。
+    zero_base : float
+        許容誤差。
+
+    Returns
+    -------
+    bool
+        True:
+            含まれている。
+        False:
+            含まれていない。
+            許容誤差が負である。
+
+    """
+    return any(is_zero_mat(mat-i,zero_base) for i in matlist)
+   
+def has_unit_determinant(mat: numpy.ndarray, zero_base: float) -> bool:
+    """
+    指定の行列の行列式の絶対値が、許容誤算範囲で1であるか判定する。
+
+    Parameters
+    ----------
+    mat : numpy.ndarray
+        複素正方行列。
+    zero_base : float
+        許容誤差。
+
+    Returns
+    -------
+    bool
+        True:
+            （行列式の絶対値）-1の絶対値がzero_base以下である。
+        False:
+            （行列式の絶対値）-1の絶対値がzero_baseより大きい。
+            許容誤差が負である。
+
+    """
+    return is_zero_num(abs(numpy.linalg.det(mat))-1,zero_base)
 
 def generate_group(
-        matlist: 'list[ComplexSquareMatrix]', zero_base: float, maximal: int,
+        matlist: 'list[numpy.ndarray]', zero_base: float, maximal: int,
         controller: 'Controller' = None
         ) -> 'GenerateGroupResult':
     """
@@ -43,21 +119,23 @@ def generate_group(
     以下のいずれかの場合は生成に失敗する。
     許容誤差が負である。
     生成元の個数が0である。
-    生成元の次元が合っていない。
+    生成元が正方行列でない。
+    生成元の次数が合っていない。
     生成元に行列式の絶対値が1でないものが含まれている。
     要素数が最大値を超えても群が閉じない。
 
     Parameters
     ----------
-    matlist : 'list[ComplexSquareMatrix]'
+    matlist : list[numpy.ndarray]
         生成元のリスト。
     zero_base : float
         許容誤差。
     maximal : int
         群の要素の最大値。
         生成された群の要素数がこの値を超えた場合、有限では閉じないものと判定する。
-    controller : 'Controller'
-        コントローラー。The default is None.
+    controller : 'Controller', optional
+        コントローラー。
+        The default is None.
 
     Returns
     -------
@@ -65,38 +143,39 @@ def generate_group(
         生成結果を表すクラス。
 
     """
-    cntl = (controller if controller is not None
-            else NullController())
+    ctrl = (controller if controller is not None else NullController())
     n_mat = len(matlist)
-    cntl.calc_progress("%d個の生成元から群の生成を開始" % n_mat)
+    ctrl.calc_start("%d個の生成元から群の生成を開始" % n_mat)
     # 許容誤差が負ならば失敗
     # 一致判定で常に不一致とされて、無限に生成されるため
     if zero_base < 0:
-        cntl.calc_progress("失敗：許容誤差が負の値である")
+        ctrl.calc_end("失敗：許容誤差が負である")
         return GenerateGroupResult()   
     # 生成元が0個ならば失敗
     if n_mat == 0:
-        cntl.calc_progress("失敗：生成元の個数が0である")
+        ctrl.calc_end("失敗：生成元の個数が0である")
         return GenerateGroupResult()
-    order = matlist[0].order
-    # 生成元の次元が合っていなければ失敗
-    if any(i.order != order for i in matlist):
-        cntl.calc_progress("失敗：生成元の次元が合っていない")
+    # 生成元が正方行列でなければ失敗。
+    if any(i.ndim != 2 for i in matlist):
+        ctrl.calc_end("失敗：生成元が正方行列でない")
+        return GenerateGroupResult()        
+    order = matlist[0].shape[0]
+    correct_shape = (order, order)
+    # 生成元の次数が合っていなければ失敗
+    if any(i.shape != correct_shape for i in matlist):
+        ctrl.calc_end("失敗：生成元の次数が合っていない")
         return GenerateGroupResult()
     # 生成元に行列式の絶対値が1でないものが含まれていたら失敗
     # 有限で閉じないため
-    if any(not i.has_unit_determinant(zero_base) for i in matlist):
-        cntl.calc_progress(
-            "失敗：生成元に行列式の絶対値が1でないものが含まれている")
+    if any(not has_unit_determinant(i,zero_base) for i in matlist):
+        ctrl.calc_end("失敗：生成元に行列式の絶対値が1でないものが含まれている")
         return GenerateGroupResult()
     # 生成元の整理：単位元の除外、重複削除
     gen_list = []
-    identity = ComplexSquareMatrix.identity(order)
+    identity = numpy.identity(order)
     for i in matlist:
-        if i.equal_to(identity,zero_base):
-            continue
-        if i.is_included(gen_list,zero_base):
-            continue
+        if is_zero_mat(i-identity,zero_base): continue
+        if is_mat_in_list(i,gen_list,zero_base): continue
         gen_list.append(i)
     # 元の生成
     element_all = [identity] + gen_list
@@ -106,161 +185,92 @@ def generate_group(
     n_loop= 0
     while len(element_prev) != 0:
         if n_all > maximal:
-            cntl.calc_progress(
+            ctrl.calc_end(
                 "失敗：要素数が最大値(%d)を超えても群が閉じない" % maximal)
             return GenerateGroupResult()
         n_loop += 1
-        cntl.calc_progress("-- loop(%d): 要素数(%d)" % (n_loop,n_all))
+        ctrl.calc_progress("-- loop(%d): 要素数(%d)" % (n_loop,n_all))
         # 新しい行列を生成
-        new_list = [mat1.dot(mat2) for (mat1, mat2) 
+        new_list = [numpy.dot(mat1,mat2) for (mat1, mat2) 
                     in itertools.product(element_prev,gen_list)]
         # 生成されたものが既存の行列と被っていなければリストに追加
         for i in new_list:
-            if not i.is_included(element_all,zero_base):
-                element_new.append(i)
-                element_all.append(i)
+            if is_mat_in_list(i,element_all,zero_base): continue
+            element_new.append(i)
+            element_all.append(i)
         # 情報を更新
         n_all += len(element_new)
         element_prev = element_new[:]
         element_new = []
-    cntl.calc_progress("生成完了：位数(%d)" % n_all)
+    ctrl.calc_end("生成完了：位数(%d)" % n_all)
     return GenerateGroupResult(element_all)
 
-class ComplexSquareMatrix(object):
+def calc_cayleytable(matlist: 'list[numpy.ndarray]', zero_base: float,
+                     controller: 'Controller' = None
+                     ) -> 'CalcCayleyTableResult':
     """
-    複素正方行列を表す。
-    
+    指定の群の乗積表を作成する。
+    generate_group()で作成された行列のリストを指定する。
+    以下のいずれかの場合には作成に失敗する。
+    許容誤差が負である。
+    位数が0である。
+    群が閉じていない。   
+
+    Parameters
+    ----------
+    matlist : list[numpy.ndarray]
+        群の要素のリスト。
+        generate_group()で作成された行列のリストを指定する。
+    zero_base : float
+        許容誤差。
+    controller : 'Controller', optional
+        コントローラー。
+        The default is None.
+
+    Returns
+    -------
+    CalcCayleyTableResult
+        作成結果を表すクラス。
+
     """
-    def __init__(self, matrix: numpy.ndarray):
-        """
-        複素正方行列を作成する。
-
-        Parameters
-        ----------
-        matrix : numpy.ndarray
-            複素正方行列。
-            要素が複素数である。
-            次元数が2である。
-            行数と列数が一致する。
-
-        Returns
-        -------
-        None.
-
-        """
-        self.matrix = matrix
-        self.order = matrix.shape[0]
-    
-    @classmethod
-    def identity(cls, order: int) -> 'ComplexSquareMatrix':
-        """
-        指定の次数の単位行列を作成する。
-
-        Parameters
-        ----------
-        cls : 'ComplexSquareMatrix'
-            'ComplexSquareMatrix'
-        order : int
-            次数。正の整数。
-
-        Returns
-        -------
-        ComplexSquareMatrix
-            単位行列。
-
-        """
-        return ComplexSquareMatrix(numpy.identity(order))
-    
-    def dot(self, csmatrix: 'ComplexSquareMatrix') -> 'ComplexSquareMatrix':
-        """
-        この行列に指定の行列を右から掛ける。
-
-        Parameters
-        ----------
-        csmatrix : 'ComplexSquareMatrix'
-            右から掛ける複素正方行列。
-            この行列と同じ次数でなければならない。
-
-        Returns
-        -------
-        ComplexSquareMatrix
-            演算結果の複素正方行列。
-
-        """
-        return ComplexSquareMatrix(numpy.dot(self.matrix,csmatrix.matrix))
-         
-    def equal_to(
-            self, csmatrix: 'ComplexSquareMatrix', zero_base: float
-            ) -> bool:
-        """
-        許容誤差の範囲でこの行列と指定の行列が一致するか判定する。
-
-        Parameters
-        ----------
-        csmatrix : ComplexSquareMatrix
-            比較対象の複素正方行列。
-        zero_base : float
-            許容誤差。
-
-        Returns
-        -------
-        bool
-            True:
-                全ての要素が許容誤差の範囲で一致する。
-            False:
-                次数が一致しない。
-                許容誤差の範囲で一致しない要素が存在する。
-                許容誤差が負である。
-
-        """
-        if self.order!=csmatrix.order:
-            return False
-        mat = self.matrix - csmatrix.matrix
-        return all(are_equal(i,0,zero_base) for i in numpy.ravel(mat))
-    
-    def has_unit_determinant(self, zero_base: float) -> bool:
-        """
-        許容誤差の範囲で行列式の絶対値が1であるか判定する。
-
-        Parameters
-        ----------
-        zero_base : float
-            許容誤差。
-
-        Returns
-        -------
-        bool
-        True:
-            （行列式の絶対値）-1の絶対値がzero_base以下である。
-        False:
-            （行列式の絶対値）-1の絶対値がzero_baseより大きい。
-            許容誤差が負である。
-
-        """
-        return are_equal(abs(numpy.linalg.det(self.matrix)),1,zero_base)
-
-    def is_included(
-            self, matlist: 'list[ComplexSquareMatrix]', zero_base: float
-            ) -> bool:
-        """
-        指定のリストの中に、許容誤差の範囲でこの行列に一致する行列が含まれているか判定する。
-        ----------
-        matlist : list[ComplexSquareMatrix]
-            複素正方行列のリスト。
-        zero_base : float
-            許容誤差。
-    
-        Returns
-        -------
-        bool
-            True:
-                一致する行列が含まれている。
-            False:
-                一致する行列が含まれていない。
-                許容誤差が負である。
-    
-        """
-        return any(self.equal_to(i,zero_base) for i in matlist)
+    ctrl = controller if controller is not None else NullController()
+    n = len(matlist)
+    ctrl.calc_start("位数(%d)の群の乗積表の作成を開始" % n)
+    # 許容誤差が負ならば失敗
+    # 一致判定で常に不一致と判定されるため
+    if zero_base < 0:
+        ctrl.calc_end("失敗：許容誤差が負である")
+        return CalcCayleyTableResult()
+    # 位数が0ならば失敗
+    if n == 0:
+        ctrl.calc_end("失敗：位数が0である")
+        return CalcCayleyTableResult()   
+    # 乗積表を表す行列を作成
+    table = numpy.zeros((n,n),dtype=numpy.int)
+    # 行列の一致判定にコストがかかるため、なるべく回避する   
+    check_list_column = [[False for i1 in range(n)] for i2 in range(n)]
+    for i1 in range(n):
+        check_list_row = [False for i2 in range(n)]
+        for i2 in range(n):
+            mat = numpy.dot( matlist[i1],matlist[i2])
+            flag = False
+            for i3 in range(n):
+                if check_list_row[i3]: continue
+                if check_list_column[i2][i3]: continue
+                if is_zero_mat(mat-matlist[i3],zero_base):
+                    flag = True
+                    table[i1,i2] = i3
+                    check_list_row[i3] = True
+                    check_list_column[i2][i3] = True
+                    break
+            # 見つからなかった場合は失敗
+            # 群が閉じていないため
+            if not flag:
+                ctrl.calc_end("失敗：群が閉じていない")
+                return CalcCayleyTableResult()
+        ctrl.calc_progress("-- 進捗: %d/%d" % (i1+1,n))
+    ctrl.calc_end("作成完了")
+    return CalcCayleyTableResult(table)     
 
 class GenerateGroupResult(object):
     """
@@ -273,13 +283,13 @@ class GenerateGroupResult(object):
         value = None
 
     """
-    def __init__(self, csmatlist: 'list[ComplexSquareMatrix]' = None):
+    def __init__(self, matlist: 'list[numpy.ndarray]' = None):
         """
         群の生成結果を作成する。
 
         Parameters
         ----------
-        csmatlist : 'list[ComplexSquareMatrix]', optional
+        matlist : list[numpy.ndarray], optional
             生成された行列のリスト。
             リストがNoneでなければ生成成功の結果を作成する。
             リストがNoneならば生成失敗の結果を作成する。
@@ -290,5 +300,36 @@ class GenerateGroupResult(object):
         None.
 
         """
-        self.has_value = True if csmatlist is not None else False
-        self.value = csmatlist
+        self.has_value = True if matlist is not None else False
+        self.value = matlist
+        
+class CalcCayleyTableResult(object):
+    """
+    乗積表の作成結果を表す。
+    作成に成功した場合:
+        has_value = True
+        value = (作成された乗積表)
+    作成に失敗した場合:
+        has_value = False
+        value = None
+        
+    """
+    def __init__(self, table: numpy.ndarray = None):
+        """
+        乗積表の作成結果を作成する。
+
+        Parameters
+        ----------
+        table : numpy.ndarray, optional
+            生成された乗積表。
+            値がNoneでなければ作成成功の結果を作成する。
+            値がNoneならば作成失敗の結果を作成する。
+            The default is None.
+
+        Returns
+        -------
+        None.
+
+        """
+        self.has_value = True if table is not None else False
+        self.value = table
