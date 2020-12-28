@@ -11,6 +11,23 @@ class Controller(metaclass = ABCMeta):
     
     """
     @abstractmethod
+    def calc_start(self, text: str):
+        """
+        計算の開始を把握するためのメソッド。
+
+        Parameters
+        ----------
+        text : str
+            計算開始を表す文章。
+
+        Returns
+        -------
+        None.
+
+        """
+        pass
+    
+    @abstractmethod
     def calc_progress(self, text: str):
         """
         主に時間のかかる計算の進捗を把握するためのメソッド。
@@ -26,28 +43,48 @@ class Controller(metaclass = ABCMeta):
 
         """
         pass
+    
+    @abstractmethod
+    def calc_end(self, text: str):
+        """
+        計算の終了を把握するためのメソッド。
+
+        Parameters
+        ----------
+        text : str
+            計算終了を表す文章。
+
+        Returns
+        -------
+        None.
+
+        """
+        pass
 
 class NullController(Controller):
     """
     コントローラーを指定しない場合に用いるダミーのコントローラー。
     何の機能も持たない。
-    Singletonパターン。
     
     """
-    _instance = None
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
+    def calc_start(self, text: str):
+        pass
+    def calc_progress(self, text: str):
+        pass
+    def calc_end(self, text: str):
+        pass
 
 class ConsoleController(Controller):
     """
     コンソール出力のみを扱うコントローラー。
     
     """
-    def calc_progress(self, text: str):
+    def calc_start(self, text: str):
         print(text)
-
+    def calc_progress(self, text: str):
+        print("\r"+text,end ="")
+    def calc_end(self, text: str):
+        print("\n"+text)
 
 class APPController(Controller):
     """

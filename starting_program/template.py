@@ -16,13 +16,32 @@ from application.controller import ConsoleController
 # 生成元は numpy.array() で定義すること
 # 複素数も使用可能
 
-gen1 = numpy.array([[0,-1,0],
-                    [1,0,0],
-                    [0,0,1]])
+# gen1 = numpy.array([[0,-1,0],
+#                     [1,0,0],
+#                     [0,0,1]])
 
-gen2 = numpy.array([[1,0,0],
+# gen2 = numpy.array([[1,0,0],
+#                     [0,0,1],
+#                     [0,1,0]])
+
+
+###### [位数:6n^2] Delta(6n^2) の生成元
+n = 8
+p = numpy.exp(2*numpy.pi*1j / float(n))
+q = numpy.exp(-2*numpy.pi*1j / float(n))
+gen1 = numpy.array([[0,1,0],
                     [0,0,1],
-                    [0,1,0]])
+                    [1,0,0]])
+gen2 = numpy.array([[0,0,1],
+                    [0,1,0],
+                    [1,0,0]])
+gen3 = numpy.array([[p,0,0],
+                    [0,q,0],
+                    [0,0,1]])
+gen4 = numpy.array([[1,0,0],
+                    [0,p,0],
+                    [0,0,q]])
+generators = [gen1,gen2,gen3,gen4]
 
 
 ####
@@ -31,7 +50,7 @@ gen2 = numpy.array([[1,0,0],
 # 例えば, 生成元が 3個 ならば
 # generators = [gen1,gen2,gen3]
 
-generators = [gen1,gen2]
+#generators = [gen1,gen2]
 
 ####
 #### STEP3 群の位数の最大値[maximal]を決定する
@@ -47,9 +66,12 @@ maximal = 2000
 ############
 zero_base = 0.0001
 
-matlist = [matcal.ComplexSquareMatrix(i) for i in generators]
-app_ctrl = ConsoleController()
-result = matcal.generate_group(matlist, zero_base, maximal, app_ctrl)
+matlist = generators
+ctrl = ConsoleController()
+matlist = matcal.generate_group(matlist, zero_base, maximal, ctrl).value
+result = matcal.calc_cayleytable(matlist, zero_base, ctrl)
+
+
 
 
 
