@@ -4,7 +4,7 @@
 import sys
 import numpy
 sys.path.append('../')
-from application.calc import matcal
+from application.calc import matcal, mastergroup, group
 from application.controller import ConsoleController
 ############
 ############ 以降を編集する
@@ -26,7 +26,7 @@ from application.controller import ConsoleController
 
 
 ###### [位数:6n^2] Delta(6n^2) の生成元
-n = 8
+n = 4
 p = numpy.exp(2*numpy.pi*1j / float(n))
 q = numpy.exp(-2*numpy.pi*1j / float(n))
 gen1 = numpy.array([[0,1,0],
@@ -66,16 +66,12 @@ maximal = 2000
 ############
 zero_base = 0.0001
 
-matlist = generators
 ctrl = ConsoleController()
-matlist = matcal.generate_group(matlist, zero_base, maximal, ctrl).value
+matlist = matcal.generate_group(generators, zero_base, maximal, ctrl).value
 result = matcal.calc_cayleytable(matlist, zero_base, ctrl)
-
-
-
-
-
-
-
-
+master = mastergroup.MasterGroup(result.value)
+g0 = group.Group(master,master.all_elements)
+print(master.cayley_table)
+g1 = group.Group(master,master.calc_closure({1,}))
+print(g1.cayley_table)
 

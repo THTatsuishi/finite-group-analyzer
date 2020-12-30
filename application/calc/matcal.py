@@ -1,11 +1,9 @@
 """
-行列計算用のモジュール。
+行列計算を行うためのモジュール。
 """
 import itertools
 import numpy
-import sys
-sys.path.append('../')
-from application.controller import Controller, NullController
+from ..controller import Controller, NullController
 
 def is_zero_num(num: complex, zero_base: float) -> bool:
     """
@@ -53,7 +51,8 @@ def is_zero_mat(
             許容誤差の範囲で0でない要素が存在する。
             許容誤差が負である。
 
-    """   
+    """
+    # この関数は何度も呼び出されるため、速度が重要である
     for row in mat:
         for num in row:
             if not is_zero_num(num,zero_base): return False
@@ -70,7 +69,7 @@ def is_mat_in_list(
     ----------
     mat : numpy.ndarray
         複素行列。
-    matlist : list[numpy.ndarray]
+    matlist : 'list[numpy.ndarray]'
         複素行列のリスト。
     zero_base : float
         許容誤差。
@@ -126,7 +125,7 @@ def generate_group(
 
     Parameters
     ----------
-    matlist : list[numpy.ndarray]
+    matlist : 'list[numpy.ndarray]'
         生成元のリスト。
     zero_base : float
         許容誤差。
@@ -218,7 +217,7 @@ def calc_cayleytable(matlist: 'list[numpy.ndarray]', zero_base: float,
 
     Parameters
     ----------
-    matlist : list[numpy.ndarray]
+    matlist : 'list[numpy.ndarray]'
         群の要素のリスト。
         generate_group()で作成された行列のリストを指定する。
     zero_base : float
@@ -270,66 +269,94 @@ def calc_cayleytable(matlist: 'list[numpy.ndarray]', zero_base: float,
                 return CalcCayleyTableResult()
         ctrl.calc_progress("-- 進捗: %d/%d" % (i1+1,n))
     ctrl.calc_end("作成完了")
-    return CalcCayleyTableResult(table)     
+    cayley_table = CayleyTable(matlist, table)
+    return CalcCayleyTableResult(cayley_table)     
 
 class GenerateGroupResult(object):
     """
     群の生成結果を表す。
-    生成に成功した場合:
-        has_value = True,
-        value = (生成された行列のリスト)
-    生成に失敗した場合:
-        has_value = False,
-        value = None
+
+    Attributes
+    ----------
+    has_value : bool
+        生成に成功したかどうか。
+        
+        True:
+            生成に成功した。
+        
+        False:
+            生成に失敗した。
+    
+    value : 'tuple[numpy.ndarray]'
+        生成された行列のタプル。
+        生成に失敗した場合はNone。
+
+    Parameters
+    ----------
+    matlist : 'list[numpy.ndarray]', optional
+        生成された行列のリスト。
+        リストがNoneでなければ生成成功の結果を作成する。
+        リストがNoneならば生成失敗の結果を作成する。
+        The default is None.
 
     """
     def __init__(self, matlist: 'list[numpy.ndarray]' = None):
-        """
-        群の生成結果を作成する。
-
-        Parameters
-        ----------
-        matlist : list[numpy.ndarray], optional
-            生成された行列のリスト。
-            リストがNoneでなければ生成成功の結果を作成する。
-            リストがNoneならば生成失敗の結果を作成する。
-            The default is None.
-
-        Returns
-        -------
-        None.
-
-        """
         self.has_value = True if matlist is not None else False
-        self.value = matlist
+        self.value = tuple(matlist)
         
 class CalcCayleyTableResult(object):
     """
     乗積表の作成結果を表す。
-    作成に成功した場合:
-        has_value = True
-        value = (作成された乗積表)
-    作成に失敗した場合:
-        has_value = False
-        value = None
+    
+    Attributes
+    ----------
+    has_value : bool
+        作成に成功したかどうか。
+        
+        True:
+            作成に成功した。
+        
+        False:
+            作成に失敗した。
+    
+    value : numpy.ndarray
+        作成された乗積表。
+        作成に失敗した場合はNone。
+    
+    Parameters
+    ----------
+    table : 'CaylayTable', optional
+        生成された乗積表。
+        値がNoneでなければ作成成功の結果を作成する。
+        値がNoneならば作成失敗の結果を作成する。
+        The default is None.  
         
     """
-    def __init__(self, table: numpy.ndarray = None):
-        """
-        乗積表の作成結果を作成する。
-
-        Parameters
-        ----------
-        table : numpy.ndarray, optional
-            生成された乗積表。
-            値がNoneでなければ作成成功の結果を作成する。
-            値がNoneならば作成失敗の結果を作成する。
-            The default is None.
-
-        Returns
-        -------
-        None.
-
-        """
+    def __init__(self, table: 'CayleyTable'= None):
         self.has_value = True if table is not None else False
         self.value = table
+        
+class CayleyTable(object):
+    """
+    乗積表を表す。
+    
+    Attributes
+    ----------
+    matlist : 'tuple[numpy.ndarray]'
+        要素のタプル。
+    
+    table: numpy.ndarray
+        乗積表。
+    
+    Parameters
+    ----------
+    matlist : 'list[numpy.ndarray]'
+        要素のリスト。
+        この順番で採番する。
+    table : numpy.ndarray
+        乗積表。
+
+    """
+    def __init__(self, matlist: 'list[numpy.ndarray]', table: numpy.ndarray):
+        self.matlist = tuple(matlist)
+        self.table = table.copy()
