@@ -71,7 +71,6 @@ matlist = matcal.generate_group(generators, zero_base, maximal, ctrl).value
 result = matcal.calc_cayleytable(matlist, zero_base, ctrl)
 master = mastergroup.MasterGroup(result.value)
 g0 = group.Group(master,master.all_elements)
-print(master.cayley_table)
 g1 = group.Group(master,master.calc_closure({1,}))
-print(g1.cayley_table)
+print(g0.conjugacy_count)
 

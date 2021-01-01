@@ -37,6 +37,8 @@ class MasterGroup(object):
         self._inverse_data = self._calc_inverse_data()
         # 共役変換表
         self._conjugate_data = self._calc_conjugate_data()
+        # 元の位数の対応表
+        self._index_order_data = self._calc_index_order_data()
         # 約数リスト
         self._divisor_dict = self._calc_divisor_dict()
     
@@ -88,7 +90,6 @@ class MasterGroup(object):
         """
         return self._matrix_rep_of_elements
     
-    
     def index_prod(self, index1: int, index2: int) -> int:
         """
         二つの元の積を返す。
@@ -138,8 +139,10 @@ class MasterGroup(object):
         ----------
         index1 : int
             一つ目の元のインデックス。
+            gに対応する。
         index2 : int
             二つ目の元のインデックス。
+            hに対応する。
 
         Returns
         -------
@@ -158,8 +161,10 @@ class MasterGroup(object):
         ----------
         index1 : int
             一つ目の元のインデックス。
+            gに対応する。
         index2 : int
             二つ目の元のインデックス。
+            hに対応する。
 
         Returns
         -------
@@ -167,11 +172,25 @@ class MasterGroup(object):
             演算結果の元のインデックス。
 
         """
-        i1 = self.index_inverse(index1)
-        i2 = self.index_inverse(index2)
-        result = self.index_prod(index1,index2)
-        result = self.index_prod(result,i1)
-        return self.index_prod(result,i2)
+        return self._comutator_data[index1][index2]
+   
+    def index_order(self, index: int) -> int:
+        """
+        指定の元の位数を返す。
+        元を位数乗すると単位元となる。
+
+        Parameters
+        ----------
+        index : int
+            指定の元のインデックス。
+
+        Returns
+        -------
+        int
+            元の位数。
+
+        """
+        return self._index_order_data[index]
     
     def divisor_of(self, a: int) -> 'tuple[int]':
         """
@@ -310,15 +329,69 @@ class MasterGroup(object):
             共役変換表。
 
         """
-        conjugate_table = [None for i in range(self.order)]
-        for index1 in range(self.order):
-            conjugate_list = [None for i in range(self.order)]
-            for index2 in range(self.order):
-                conj = self.index_prod(index2,index1)
-                conj = self.index_prod(conj,self.index_inverse(index2))
-                conjugate_list[index2] = conj
-            conjugate_table[index1] = tuple(conjugate_list)
-        return tuple(conjugate_table)
+        conjugate_table = numpy.identity(self.order,dtype=int)
+        for (g, h) in itertools.product(self.all_elements,self.all_elements):
+            h_inv = self.index_inverse(h)
+            result = self.index_prod(h,g)
+            result = self.index_prod(result,h_inv)
+            conjugate_table[g][h] = result
+        return conjugate_table        
+    
+    def _calc_comutator_data(self) -> numpy.ndarray:
+        """
+        元の交換子を計算する。
+        gとhの交換子： [g,h] = g * h * g^(-1) * h^(-1)
+
+        Returns
+        -------
+        numpy.ndarray
+            交換子表。
+
+        """
+        comutator_table = numpy.identity(self.order,dtype=int)
+        for (g, h) in itertools(self.all_elements,self.all_elements):
+            g_inv = self.index_inverse(g)
+            h_inv = self.index_inverse(h)
+            result = self.index_prod(g,h)
+            result = self.index_prod(result,g_inv)
+            result = self.index_prod(result,h_inv)
+            comutator_table[g][h] = result
+        return comutator_table 
+    
+    def _calc_index_order(self, index) -> int:
+        """
+        指定の元の位数を計算する。
+        元を位数乗すると単位元となる。
+
+        Parameters
+        ----------
+        index : TYPE
+            指定の元のインデックス。
+
+        Returns
+        -------
+        int
+            元の位数。
+
+        """
+        current_index = index
+        current_order = 1
+        while current_index != self._identity_index:
+            current_index = self.index_prod(current_index,index)
+            current_order +=1
+        return current_order
+    
+    def _calc_index_order_data(self) -> 'tuple[int]':
+        """
+        全ての元の位数を計算する。
+
+        Returns
+        -------
+        TYPE
+            元の位数の一覧。
+
+        """
+        return tuple(self._calc_index_order(i) for i in self.all_elements)
         
     def _calc_divisor_dict(self):
         """
