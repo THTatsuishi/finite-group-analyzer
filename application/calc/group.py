@@ -880,6 +880,35 @@ class Group(object):
         """
         return (self is other) or (self.elements == other.elements)
     
+    def is_subgroup_of(self, group: 'Group') -> bool:
+        """
+        この群が指定の群の部分群であるか判定する。
+
+        Parameters
+        ----------
+        group : 'Group'
+            指定の群。
+
+        Returns
+        -------
+        bool
+            True:
+                部分群である。
+            False:
+                部分群でない。
+
+        """
+        return self.elements <= group.elements    
+    
+    def is_normalsubgroup_of(self, group: 'Group') -> bool:
+        # 部分群でなければ正規部分群ではない
+        if not self.is_subgroup_of(group): return False
+        # 共役変換で閉じるかを確認する（all_normalsubを使用しない）
+        conj_list = (self._master.index_conjugate(g, h) for (g,h) in 
+                itertools.product(self.elements, group.elements))
+        # 共役変換された結果の元が全て自身の元であれば正規部分群である
+        return all((g in self.elements) for g in conj_list)
+    
     def _calc_cayley_table(self) -> numpy.ndarray:
         """
         この群の乗積表を計算する。
