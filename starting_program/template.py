@@ -72,10 +72,11 @@ matlist = matcal.generate_group(generators, zero_base, maximal, ctrl).value
 result = matcal.calc_cayleytable(matlist, zero_base, ctrl)
 master = MasterGroup(result.value)
 master.group_initial  = "g"
-g0 = master.create_group(master.all_elements)
-g1 = master.generate_group({1,2})
-g2 = g1.centrizer
-g3 = master.generate_group({1,2})
+g0 = master.maximal_group
+g1 = master.trivial_group
+g2 = master.generate_group({1,2})
+g3 = g2.centrizer
+g4 = master.generate_group({1,2})
 print(g0.name)
 print(g1.name)
 print(g2.name)

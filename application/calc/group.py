@@ -47,6 +47,10 @@ class MasterGroup(object):
         self._group_initial = "group"
         # 生成された部分群の一覧
         self._group_storage = set()
+        # 最大の群
+        self._maximal_group = None
+        # 自明群
+        self._trivial_group = None
     
     @property
     def group_initial(self) -> str:
@@ -103,7 +107,36 @@ class MasterGroup(object):
 
         """
         return self._matrix_rep_of_elements
-         
+    
+    @property
+    def maximal_group(self) -> 'Group':
+        """
+
+        Returns
+        -------
+        'Group'
+            MasterGroupの最大の部分群。
+            MasterGroupに対応する群オブジェクト。
+
+        """
+        if self._maximal_group is None:
+            self._maximal_group = self.create_group(self.all_elements)
+        return self._maximal_group
+    
+    @property
+    def trivial_group(self) -> 'Group':
+        """
+
+        Returns
+        -------
+        'Group'
+            自明群。単位元のみからなる群。
+
+        """
+        if self._trivial_group is None:
+            self._trivial_group = self.create_group({self._identity_index})
+        return self._trivial_group
+    
     def naming_group(self, group: 'Group'):
         name = f'{self.group_initial}{self._group_count}'
         group.name = name
