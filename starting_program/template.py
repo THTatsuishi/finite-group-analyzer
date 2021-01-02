@@ -4,7 +4,8 @@
 import sys
 import numpy
 sys.path.append('../')
-from application.calc import matcal, mastergroup, group
+from application.calc import matcal
+from application.calc.group import MasterGroup, Group
 from application.controller import ConsoleController
 ############
 ############ 以降を編集する
@@ -69,8 +70,15 @@ zero_base = 0.0001
 ctrl = ConsoleController()
 matlist = matcal.generate_group(generators, zero_base, maximal, ctrl).value
 result = matcal.calc_cayleytable(matlist, zero_base, ctrl)
-master = mastergroup.MasterGroup(result.value)
-g0 = group.Group(master,master.all_elements)
-g1 = group.Group(master,master.calc_closure({1,}))
-print(g0.conjugacy_count)
+master = MasterGroup(result.value)
+master.group_initial  = "g"
+g0 = master.create_group(master.all_elements)
+g1 = master.generate_group({1,2})
+g2 = g1.centrizer
+g3 = master.generate_group({1,2})
+print(g0.name)
+print(g1.name)
+print(g2.name)
+print(g3.name)
+print(len(master._group_storage))
 
