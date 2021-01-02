@@ -1025,7 +1025,7 @@ class Group(object):
         normalsub_all = normalsub_set        
         normalsub_prev = seed[:]
         normalsub_new = []
-        n_prev = normalsub_prev
+        n_prev = len(normalsub_prev)
         loop = 0
         while n_prev != 0:
             loop += 1

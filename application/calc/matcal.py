@@ -178,7 +178,7 @@ def generate_group(
         gen_list.append(i)
     # 元の生成
     element_all = [identity] + gen_list
-    element_prev = gen_list[:]
+    element_prev = tuple(gen_list)
     element_new = []
     n_all = len(element_all)
     n_loop= 0
@@ -199,7 +199,7 @@ def generate_group(
             element_all.append(i)
         # 情報を更新
         n_all += len(element_new)
-        element_prev = element_new[:]
+        element_prev = tuple(element_new)
         element_new = []
     ctrl.calc_end("生成完了：位数(%d)" % n_all)
     return GenerateGroupResult(element_all)
