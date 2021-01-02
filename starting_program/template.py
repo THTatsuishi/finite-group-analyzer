@@ -76,5 +76,5 @@ g0 = master.maximal_group
 g1 = master.trivial_group
 normal_list = g0.all_normalsub
 for normal in normal_list:
-    print(normal)
+    print(normal.is_normalsubgroup_of(g1))
 
