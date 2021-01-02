@@ -3,7 +3,7 @@
 """
 import itertools
 import numpy
-from . import calctools
+from .calctools import calc_divisor, CartesianProduct
 from .matcal import CayleyTable
 from .conjugacy import ConjugacyClass, ConjugacyCount
 
@@ -527,8 +527,8 @@ class MasterGroup(object):
 
         """
         # 位数の約数。1も含む
-        div_tuple = calctools.calc_divisor(self._order, True)        
-        return {i: calctools.calc_divisor(i,True) for i in div_tuple}
+        div_tuple = calc_divisor(self._order, True)        
+        return {i: calc_divisor(i,True) for i in div_tuple}
 
 class Group(object):
     """
@@ -580,6 +580,10 @@ class Group(object):
 
         """
         return self._name
+    
+    @property
+    def master(self):
+        return self._master
     
     @name.setter
     def name(self, name: str):
@@ -765,7 +769,7 @@ class Group(object):
         if self._is_abelian is None:
             # 導来部分群が自明群と一致するかどうかで判定する
             derived = self.derived
-            trivial = self._master.trivial_group
+            trivial = self.master.trivial_group
             self._is_abelian = derived.equal_to(trivial)
         return self._is_abelian    
 
@@ -812,7 +816,7 @@ class Group(object):
         if self._is_solvable is None:
             # 導来列の最後が自明群であるかでどうかで判定する
             group = self.derived_series[-1]
-            trivial = self._master.trivial_group
+            trivial = self.master.trivial_group
             self._is_solvable = group.equal_to(trivial)
         return self._is_solvable
     
@@ -859,6 +863,9 @@ class Group(object):
             self._is_simple = self._calc_is_simple()
         return self._is_simple    
 
+    def has_same_master(self, other: 'group') -> bool:
+        return self.master is other.master
+
     def equal_to(self, other: 'Group') -> bool:
         """
         この群と指定の群の要素が完全に一致するか判定する。
@@ -878,8 +885,9 @@ class Group(object):
                 それ以外。
 
         """
-        return (self is other) or (self.elements == other.elements)
-    
+        return (self.has_same_master(other) 
+                and ((self is other) or (self.elements == other.elements)))
+       
     def is_subgroup_of(self, group: 'Group') -> bool:
         """
         この群が指定の群の部分群であるか判定する。
@@ -898,16 +906,61 @@ class Group(object):
                 部分群でない。
 
         """
-        return self.elements <= group.elements    
+        return self.has_same_master(group) and self.elements <= group.elements    
     
     def is_normalsubgroup_of(self, group: 'Group') -> bool:
+        """
+        この群が指定の群の正規部分群であるか判定する。
+
+        Parameters
+        ----------
+        group : 'Group'
+            指定の群。
+
+        Returns
+        -------
+        bool
+            True:
+                正規部分群である。
+            False:
+                正規部分群でない。
+
+        """
+        if not self.has_same_master(group): return False
         # 部分群でなければ正規部分群ではない
         if not self.is_subgroup_of(group): return False
         # 共役変換で閉じるかを確認する（all_normalsubを使用しない）
-        conj_list = (self._master.index_conjugate(g, h) for (g,h) in 
+        conj_list = (self.master.index_conjugate(g, h) for (g,h) in 
                 itertools.product(self.elements, group.elements))
         # 共役変換された結果の元が全て自身の元であれば正規部分群である
         return all((g in self.elements) for g in conj_list)
+    
+    def study_cartesian_product_type(self, group: 'Group'
+                                     ) -> 'CartesianProduct':
+        if not self.has_same_master(group): 
+            return CartesianProduct.create_invalid()
+        # 位数の積がMasterGroupの位数の約数であるか
+        order_prod = self.order * group.order
+        if not order_prod in self.master.divisor_of_order:
+            return CartesianProduct.create_invalid()
+        # 共通部分が自明であるか
+        if not len(self.elements & group.elements) == 1:
+            return CartesianProduct.create_invalid()
+        # デカルト積を取得
+        indexset = {self.master.index_prod(g,h) for (g,h) 
+                    in itertools.product(self.elements, group.elements)}
+        # デカルト積が群をなすか
+        closure = self.master.calc_closure(indexset)
+        if len(closure) != len(indexset):
+            return CartesianProduct.create_invalid()
+        # ここまで満たすと、直積 or 半直積 である
+        generated = self.master.create_group(closure)
+        right = self.is_normalsubgroup_of(generated)
+        left = group.is_normalsubgroup_of(generated)
+        if left and right:
+            return CartesianProduct.create_direct(generated)
+        if left: return CartesianProduct.create_left(generated)
+        return CartesianProduct.create_right(generated)
     
     def _calc_cayley_table(self) -> numpy.ndarray:
         """
@@ -920,7 +973,7 @@ class Group(object):
             乗積表。
 
         """
-        mastertable = self._master.cayley_table
+        mastertable = self.master.cayley_table
         table = numpy.identity(self.order,int)
         indexlist = sorted(self.elements)
         row = 0
@@ -949,10 +1002,10 @@ class Group(object):
             # 任意の要素を一つ取得
             g = list(remaining)[0]
             # 群の各元で共役変換
-            conjugacy = {self._master.index_conjugate(g,h) for h 
+            conjugacy = {self.master.index_conjugate(g,h) for h 
                          in self.elements}
             # 共役類の位数
-            order = self._master.index_order(g)
+            order = self.master.index_order(g)
             c_classes.append(ConjugacyClass(conjugacy, order))
             remaining = remaining.difference(conjugacy)
         return tuple(sorted(c_classes))
@@ -968,9 +1021,9 @@ class Group(object):
 
         """
         closure = {g for g in self.elements
-                   if all(self._master.indices_are_commutable(g, h)
+                   if all(self.master.indices_are_commutable(g, h)
                           for h in self.elements)}
-        return self._master.create_group(closure)
+        return self.master.create_group(closure)
     
     def _calc_centrizer(self) -> 'Group':
         """
@@ -982,10 +1035,10 @@ class Group(object):
             MasterGroupに対するこの群の中心化群。
 
         """
-        closure = {g for g in self._master.all_elements
-                   if all(self._master.indices_are_commutable(g, h)
+        closure = {g for g in self.master.all_elements
+                   if all(self.master.indices_are_commutable(g, h)
                           for h in self.elements)}
-        return self._master.create_group(closure)
+        return self.master.create_group(closure)
     
     def _calc_derived(self) -> 'Group':
         """
@@ -997,9 +1050,9 @@ class Group(object):
             この群の導来群。
 
         """
-        closure = {self._master.index_commutator(g, h) for (g,h) 
+        closure = {self.master.index_commutator(g, h) for (g,h) 
                    in itertools.product(self.elements, self.elements)}
-        return self._master.create_group(closure)
+        return self.master.create_group(closure)
     
     def _calc_derived_series(self) -> 'tuple[Group]':
         """
@@ -1022,11 +1075,11 @@ class Group(object):
     
     def _calc_all_normalsub(self) -> 'tuple[Group]':
         # 自明な正規部分群：自身、自明群
-        t_groupset = {self, self._master.trivial_group}
+        t_groupset = {self, self.master.trivial_group}
         # 非自明な約数の最大値
         # 位数が 1 または 素数 のとき maximal = 1
         maximal = (1 if self.order == 1 else 
-                   self._master.divisor_of(self.order)[1])
+                   self.master.divisor_of(self.order)[1])
         # 位数が 1 または 素数 の群は自明な正規部分群のみを持つ
         if maximal == 1:
             return tuple(sorted(t_groupset, reverse=True))
@@ -1038,7 +1091,7 @@ class Group(object):
         for c_class in self.conjugacy_classes:
             # 共役類の要素数が maximal なら closure は群全体
             if c_class.element_num == maximal: continue
-            closure = self._master.calc_closure(c_class.elements)
+            closure = self.master.calc_closure(c_class.elements)
             normal_all.add(closure)
             # closure が自明な部分群、または その位数が maximal のとき、
             # closure は非自明な部分群の生成系にはならない
@@ -1051,7 +1104,7 @@ class Group(object):
                             in itertools.product(normal_prev, seed) 
                             if not (normal1 <= normal2 or normal1 >= normal2))
             for gen in gen_list:
-                closure = self._master.calc_closure(gen)
+                closure = self.master.calc_closure(gen)
                 if len(closure) == self.order: continue
                 if closure in normal_all: continue
                 normal_new.append(closure)
@@ -1059,7 +1112,7 @@ class Group(object):
             normal_prev = tuple(normal_new)
             normal_new = []
         # 正規部分群となる集合の生成完了
-        group_set = {self._master.create_group(closure) for closure 
+        group_set = {self.master.create_group(closure) for closure 
                      in normal_all}
         return tuple(sorted(group_set,reverse=True))
     
@@ -1077,7 +1130,7 @@ class Group(object):
         # 可換群は、位数が素数なら単純群、素数でなければ単純群でない  
         if self.is_abelian:
             return (True 
-                    if len(self._master.divisor_of(self.order)) in {1,2} 
+                    if len(self.master.divisor_of(self.order)) in {1,2} 
                     else False)
         # 非可換群は、全ての正規部分群を生成して確認する
         return True if len(self.all_normalsub) in {1,2} else False

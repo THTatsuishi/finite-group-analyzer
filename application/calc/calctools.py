@@ -2,6 +2,7 @@
 数値計算に使用する関数。
 """
 import numpy
+from enum import Enum, auto
 
 def calc_divisor(a: int, include_one: bool) -> 'tuple[int]':
     """
@@ -36,3 +37,56 @@ def calc_divisor(a: int, include_one: bool) -> 'tuple[int]':
            div_set = div_set | {div,quot}
        div += 1
     return tuple(sorted(list(div_set),reverse=True))
+
+class CartesianProduct(object):
+    def __init_(self, product_type, group):
+        self._product_type = product_type
+        self._group = group
+        
+    @property
+    def product_type(self):
+        return self._product_type
+    
+    @property
+    def group(self):
+        return self._group
+    
+    @staticmethod
+    def create_direct(group):
+        return CartesianProduct(ProductType.DIRECT, group)
+    
+    @staticmethod
+    def create_left(group):
+        return CartesianProduct(ProductType.LEFT, group)
+
+    @staticmethod
+    def create_right(group):
+        return CartesianProduct(ProductType.RIGHT, group)
+
+    @staticmethod
+    def create_invalid():
+        return CartesianProduct(ProductType.INVALID, None)
+
+class ProductType(Enum):
+    DIRECT = auto()
+    LEFT = auto()
+    RIGHT = auto()
+    INVALID = auto()
+       
+    def is_direct_product(self) -> bool:
+        return self is ProductType.DIRECT
+    
+    def is_semidirect_product(self) -> bool:
+        return self in {ProductType.LEFT, ProductType.RIGHT}
+    
+    def is_left_semidirect_product(self) -> bool:
+        return self is ProductType.LEFT
+    
+    def is_right_semidirect_product(self) -> bool:
+        return self is ProductType.RIGHT
+    
+    def is_valid(self) -> bool:
+        return self is not ProductType.INVALID
+    
+    def is_INVALID(self) -> bool:
+        return self is ProductType.INVALID
