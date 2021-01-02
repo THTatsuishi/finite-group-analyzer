@@ -559,9 +559,13 @@ class Group(object):
         self._is_abelian = None
         self._is_perfect = None
         self._is_solvable = None
+        self._all_normalsub = None
     
     def __str__(self):
         return f'{self.name}: {tuple(sorted(list(self.elements)))}'
+    
+    def __lt__(self,other):
+        return self.order < other.order
     
     @property
     def name(self) -> str:
@@ -809,7 +813,27 @@ class Group(object):
             group = self.derived_series[-1]
             trivial = self._master.trivial_group
             self._is_solvable = group.equal_to(trivial)
-        return self._is_solvable 
+        return self._is_solvable
+    
+    @property
+    def all_normalsub(self) -> 'tuple[Group]':
+        """
+
+        Returns
+        -------
+        'tuple[Group]'
+            この群の全ての正規部分群の一覧。
+            位数の降順にソートされている。
+            
+            備考:
+                世紀部分群とは、この群部分群のうち
+                この群の任意の元の共役変換で不変なものを指す。
+
+        """
+        if self._all_normalsub is None:
+            self._all_normalsub = self._calc_all_normalsub()
+        return self._all_normalsub
+    
 
     def equal_to(self, other: 'Group') -> bool:
         """
@@ -942,8 +966,49 @@ class Group(object):
             series.append(derived)
             current = derived
         return tuple(series)
-            
     
+    def _calc_all_normalsub(self) -> 'tuple[Group]':
+        # 自明な正規部分群：自身、自明群
+        t_groupset = {self, self._master.trivial_group}
+        # 非自明な約数の最大値
+        # 位数が 1 または 素数 のとき maximal = 1
+        maximal = (1 if self.order == 1 else 
+                   self._master.divisor_of(self.order)[1])
+        # 位数が 1 または 素数 の群は自明な正規部分群のみを持つ
+        if maximal == 1:
+            return tuple(sorted(t_groupset, reverse=True))
+        # 一般の場合の処理
+        normal_all = {group.elements for group in t_groupset }
+        # 正規部分群は、共役類の和集合から生成される
+        # 各共役類を生成系として群を生成する
+        seed = set()
+        for c_class in self.conjugacy_classes:
+            # 共役類の要素数が maximal なら closure は群全体
+            if c_class.element_num == maximal: continue
+            closure = self._master.calc_closure(c_class.elements)
+            normal_all.add(closure)
+            # closure が自明な部分群、または その位数が maximal のとき、
+            # closure は非自明な部分群の生成系にはならない
+            if (1 < len(closure) < maximal): seed.add(closure)
+        # closure の和集合を生成系として正規部分群を生成する
+        normal_prev = tuple(seed)
+        normal_new = []
+        while len(normal_prev) != 0:
+            gen_list = (normal1 | normal2 for (normal1, normal2) 
+                            in itertools.product(normal_prev, seed) 
+                            if not (normal1 <= normal2 or normal1 >= normal2))
+            for gen in gen_list:
+                closure = self._master.calc_closure(gen)
+                if len(closure) == self.order: continue
+                if closure in normal_all: continue
+                normal_new.append(closure)
+                normal_all.add(closure)
+            normal_prev = tuple(normal_new)
+            normal_new = []
+        # 正規部分群となる集合の生成完了
+        group_set = {self._master.create_group(closure) for closure 
+                     in normal_all}
+        return tuple(sorted(group_set,reverse=True))
     
     
     
