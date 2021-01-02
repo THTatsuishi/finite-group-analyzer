@@ -556,6 +556,9 @@ class Group(object):
         self._centrizer = None
         self._derived = None
         self._derived_series = None
+        self._is_abelian = None
+        self._is_perfect = None
+        self._is_solvable = None
     
     def __str__(self):
         return f'{self.name}: {tuple(sorted(list(self.elements)))}'
@@ -737,6 +740,77 @@ class Group(object):
             self._derived_series = self._calc_derived_series()
         return self._derived_series   
     
+    @property
+    def is_abelian(self) -> bool:
+        """
+
+        Returns
+        -------
+        bool
+            この群が可換群と非可換群のどちらであるか。
+            True:
+                可換群である。
+            False:
+                非可換群である。
+                
+            備考:
+                可換群とは、導来部分群が自明群となる群を指す。
+
+        """
+        if self._is_abelian is None:
+            # 導来部分群が自明群と一致するかどうかで判定する
+            derived = self.derived
+            trivial = self._master.trivial_group
+            self._is_abelian = derived.equal_to(trivial)
+        return self._is_abelian    
+
+    @property
+    def is_perfect(self) -> bool:
+        """
+
+        Returns
+        -------
+        bool
+            この群が完全群であるか。
+            True:
+                完全群である。
+            False:
+                完全群でない。
+                
+            備考:
+                完全群とは、導来部分群が自分自身となる群を指す。
+
+        """
+        if self._is_perfect is None:
+            # 導来部分群が自分自身と一致するかで判定する
+            derived = self.derived
+            self._is_perfect = derived.equal_to(self)
+        return self._is_perfect    
+
+    @property
+    def is_solvable(self) -> bool:
+        """
+
+        Returns
+        -------
+        bool
+            この群が可解群であるか。
+            True:
+                可解群である。
+            False:
+                可解群でない。
+                
+            備考:
+                可解群とは、導来列が自明群で終わる群を指す。
+
+        """
+        if self._is_solvable is None:
+            # 導来列の最後が自明群であるかでどうかで判定する
+            group = self.derived_series[-1]
+            trivial = self._master.trivial_group
+            self._is_solvable = group.equal_to(trivial)
+        return self._is_solvable 
+
     def equal_to(self, other: 'Group') -> bool:
         """
         この群と指定の群の要素が完全に一致するか判定する。
@@ -869,7 +943,6 @@ class Group(object):
             current = derived
         return tuple(series)
             
-        
     
     
     

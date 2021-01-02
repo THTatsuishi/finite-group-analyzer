@@ -74,7 +74,8 @@ master = MasterGroup(result.value)
 master.group_initial  = "g"
 g0 = master.maximal_group
 g1 = master.trivial_group
-series = g0.derived_series
-for i in series:
-    print(i)
+g = g0.derived.derived
+print(g.is_abelian)
+print(g.is_perfect)
+print(g.is_solvable)
 
