@@ -3,7 +3,7 @@
 """
 import itertools
 import numpy
-from .calctools import calc_divisor, CartesianProduct
+from .calctools import calc_divisor, CartesianProduct, QuotientDecomposition
 from .matcal import CayleyTable
 from .conjugacy import ConjugacyClass, ConjugacyCount
 
@@ -863,7 +863,7 @@ class Group(object):
             self._is_simple = self._calc_is_simple()
         return self._is_simple    
 
-    def has_same_master(self, other: 'group') -> bool:
+    def has_same_master(self, other: 'Group') -> bool:
         return self.master is other.master
 
     def equal_to(self, other: 'Group') -> bool:
@@ -935,8 +935,24 @@ class Group(object):
         # 共役変換された結果の元が全て自身の元であれば正規部分群である
         return all((g in self.elements) for g in conj_list)
     
-    def study_cartesian_product_type(self, group: 'Group'
+    def study_cartesian_product(self, group: 'Group'
                                      ) -> 'CartesianProduct':
+        """
+        この群と指定の群のデカルト積が群をなすかを調べる。
+        群をなす場合には、直積 or 右半直積 or 左半直積のいずれか、および
+        生成される群を返す。
+
+        Parameters
+        ----------
+        group : 'Group'
+            指定の群。
+
+        Returns
+        -------
+        'CartesianProduct'
+            デカルト積の調査結果。
+
+        """
         if not self.has_same_master(group): 
             return CartesianProduct.create_invalid()
         # 位数の積がMasterGroupの位数の約数であるか
@@ -961,6 +977,53 @@ class Group(object):
             return CartesianProduct.create_direct(generated)
         if left: return CartesianProduct.create_left(generated)
         return CartesianProduct.create_right(generated)
+    
+    def study_quotient_decomposition(self, group: 'Group'
+                                     ) -> 'QuotientDecomposition':
+        """
+        この群が指定の群と剰余群の半直積として分解可能であるか調べる。
+        (self) = (group) \rtimes (self)/(group) と表せるかどうか。
+        直積分解可能な場合でも、直積を優先することはない。
+        半直積への分解は一意的ではないため、一つの方法のみを返す。
+        ただし、群同型を除いて一意的である。
+        元のインデックスの小さい要素を優先的に選択する。
+
+        Parameters
+        ----------
+        group : 'Group'
+            指定の群。
+
+        Returns
+        -------
+        'QuotientDecomposition'
+            分解の調査結果。
+
+        """
+        # 単純群は分解不可能
+        if self.is_simple:
+            return QuotientDecomposition.create_invalid()
+        # 正規部分群でなければ分解不可能
+        # ただし、自明な正規部分群である場合も分解不可能とする
+        if not group in self.all_normalsub[1:-1]:
+            return QuotientDecomposition.create_invalid()
+        # 一般の場合の処理
+        candidate = set(self.elements - group.elements)
+        selected = set()
+        while len(candidate) != 0:
+            index = sorted(candidate)[0]
+            candidate.discard(index)
+            indexset = selected | {index}
+            closure = self.master.calc_closure(indexset)
+            if len(closure.intersection(group.elements)) != 1: continue
+            generated = {self.master.index_prod(g, h) for (g,h) 
+                         in itertools.product(closure, group.elements)}
+            candidate = candidate - generated
+            selected.add(index)
+        closure =self.master.calc_closure(selected)
+        if len(closure)*group.order != self.order:
+            return QuotientDecomposition.create_invalid()
+        quotient = self.master.create_group(closure)
+        return QuotientDecomposition.create_valid(quotient)
     
     def _calc_cayley_table(self) -> numpy.ndarray:
         """

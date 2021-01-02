@@ -90,3 +90,24 @@ class ProductType(Enum):
     
     def is_INVALID(self) -> bool:
         return self is ProductType.INVALID
+    
+class QuotientDecomposition(object):
+    def __init__(self, is_valid, quotient):
+        self._is_valid = is_valid
+        self._quotient = quotient
+    
+    @property
+    def is_valid(self):
+        return self._is_valid
+    
+    @property
+    def quotient(self):
+        return self._quotient
+    
+    @staticmethod
+    def create_valid(quotient):
+        return QuotientDecomposition(True,quotient)
+
+    @staticmethod
+    def create_invalid():
+        return QuotientDecomposition(False,None)
