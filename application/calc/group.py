@@ -554,9 +554,11 @@ class Group(object):
         self._conjugacy_count = None
         self._center = None
         self._centrizer = None
+        self._derived = None
+        self._derived_series = None
     
     def __str__(self):
-        return f'{set(self.elements)}'
+        return f'{self.name}: {tuple(sorted(list(self.elements)))}'
     
     @property
     def name(self) -> str:
@@ -694,6 +696,47 @@ class Group(object):
             self._centrizer = self._calc_centrizer()
         return self._centrizer 
     
+    @property
+    def derived(self) -> 'Group':
+        """
+
+        Returns
+        -------
+        'Group'
+            この群の導来部分群。
+            
+            備考:
+                交換子部分群とも呼ばれる。
+                この群の全ての元の交換子の集合であり、この集合は群をなす。
+            
+        """
+        if self._derived is None:
+            self._derived = self._calc_derived()
+        return self._derived
+    
+    @property
+    def derived_series(self) -> 'tuple[Group]':
+        """
+
+        Returns
+        -------
+        tuple[Group]
+            この群の導来列。
+            (一次導来群, 二次同来群,...)と並ぶ。
+            
+            備考:
+                この群の導来部分群を第一次導来群とよび、
+                n次導来群の導来部分群をn+1次導来群と呼ぶ。
+                有限群の導来列は完全群で終わる。
+            
+            備考:
+                完全群とは、導来部分群が自分自身となる群を指す。
+
+        """
+        if self._derived_series is None:
+            self._derived_series = self._calc_derived_series()
+        return self._derived_series   
+    
     def equal_to(self, other: 'Group') -> bool:
         """
         この群と指定の群の要素が完全に一致するか判定する。
@@ -707,12 +750,13 @@ class Group(object):
         -------
         bool
             True:
+                同一オブジェクトである。
                 要素が完全に一致する。
             False:
                 それ以外。
 
         """
-        return self.elements == other.elements
+        return (self is other) or (self.elements == other.elements)
     
     def _calc_cayley_table(self) -> numpy.ndarray:
         """
@@ -783,7 +827,7 @@ class Group(object):
 
         Returns
         -------
-        TYPE
+        'Group'
             MasterGroupに対するこの群の中心化群。
 
         """
@@ -792,7 +836,40 @@ class Group(object):
                           for h in self.elements)}
         return self._master.create_group(closure)
     
+    def _calc_derived(self) -> 'Group':
+        """
+        この群の導来群を計算する。
+
+        Returns
+        -------
+        'Group'
+            この群の導来群。
+
+        """
+        closure = {self._master.index_commutator(g, h) for (g,h) 
+                   in itertools.product(self.elements, self.elements)}
+        return self._master.create_group(closure)
     
+    def _calc_derived_series(self) -> 'tuple[Group]':
+        """
+        この群の導来列を計算する。
+
+        Returns
+        -------
+        'tuple[Group]'
+            この群の導来列。
+
+        """
+        series = []
+        current = self
+        while True:
+            derived = current.derived
+            if current.equal_to(derived): break
+            series.append(derived)
+            current = derived
+        return tuple(series)
+            
+        
     
     
     

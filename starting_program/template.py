@@ -74,12 +74,7 @@ master = MasterGroup(result.value)
 master.group_initial  = "g"
 g0 = master.maximal_group
 g1 = master.trivial_group
-g2 = master.generate_group({1,2})
-g3 = g2.centrizer
-g4 = master.generate_group({1,2})
-print(g0.name)
-print(g1.name)
-print(g2.name)
-print(g3.name)
-print(len(master._group_storage))
+series = g0.derived_series
+for i in series:
+    print(i)
 
