@@ -560,6 +560,7 @@ class Group(object):
         self._is_perfect = None
         self._is_solvable = None
         self._all_normalsub = None
+        self._is_simple = None
     
     def __str__(self):
         return f'{self.name}: {tuple(sorted(list(self.elements)))}'
@@ -834,6 +835,29 @@ class Group(object):
             self._all_normalsub = self._calc_all_normalsub()
         return self._all_normalsub
     
+    @property
+    def is_simple(self) -> bool:
+        """
+
+        Returns
+        -------
+        bool
+            この群が単純群であるか。
+            True:
+                単純群である。
+            False:
+                単純群でない。
+            
+            備考:
+                単純群とは、自明な正規部分群が自明であることを指す。
+                
+            備考:
+                自明な正規部分群とは、自身と自明群を指す。
+
+        """
+        if self._is_simple is None:
+            self._is_simple = self._calc_is_simple()
+        return self._is_simple    
 
     def equal_to(self, other: 'Group') -> bool:
         """
@@ -1010,8 +1034,24 @@ class Group(object):
                      in normal_all}
         return tuple(sorted(group_set,reverse=True))
     
-    
-    
+    def _calc_is_simple(self) -> bool:
+        """
+        この群が単純群であるかを計算する。
+
+        Returns
+        -------
+        bool
+            判定結果。
+
+        """
+        # 可換群は全ての部分群が正規部分群となるため、正規部分群の生成に時間がかかる
+        # 可換群は、位数が素数なら単純群、素数でなければ単純群でない  
+        if self.is_abelian:
+            return (True 
+                    if len(self._master.divisor_of(self.order)) in {1,2} 
+                    else False)
+        # 非可換群は、全ての正規部分群を生成して確認する
+        return True if len(self.all_normalsub) in {1,2} else False
     
     
     
