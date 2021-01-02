@@ -948,7 +948,7 @@ class Group(object):
         return self._derived_series
     #End def
 
-    #### .isabelian(self) にアクセス
+    #### .is_abelian(self) にアクセス
     # 可換群であるか判定 -> bool
     def is_abelian(self):
         if self._is_abelian is not None: return self._is_abelian
