@@ -163,6 +163,12 @@ class ConjugacyCountUnit(object):
         """
         return self._degeneracy
     
+    @staticmethod
+    def create_from_data(data: 'list[int]') -> 'ConjugacyCountUnit':
+        if(len(data) != 3):
+            raise ValueError("[ConjugacyCountUnit] リストの要素数が3でない。")
+        return ConjugacyCountUnit(data[0],data[1],data[2])
+    
     def equal_to(self, other: 'ConjugacyCount') -> bool:
         """
         共役類の特性が等しいか判定する。
@@ -198,7 +204,7 @@ class ConjugacyCount(object):
     """
     def __init__(self, conjugacy_count_units: 'list[ConjugacyCountUnit]'):
         self._conjugacy_count = tuple(sorted(conjugacy_count_units))
-         
+        
     def __str__(self):
         result = "("
         num = len(self.conjugacy_count)
@@ -221,7 +227,7 @@ class ConjugacyCount(object):
             位数 > 要素数 の優先順位で昇順にソートされている。
 
         """
-        return self._conjugacy_count
+        return self._conjugacy_count             
     
     @staticmethod
     def create_from_conjugacy_classes(
@@ -259,7 +265,13 @@ class ConjugacyCount(object):
         unitlist.append(ConjugacyCountUnit(prev_order,prev_num,degeneracy))
         del unitlist[0]
         return ConjugacyCount(unitlist)
-        
+    
+    @staticmethod
+    def create_from_data(data: 'list[list[int]]') -> 'ConjugacyCount':
+        unit_data_list = [ConjugacyCountUnit.create_from_data(unit_data) 
+                          for unit_data in data]
+        return ConjugacyCount(unit_data_list)
+    
     def is_equivalent_to(self, other: 'ConjugacyCount') -> bool:
         """
         共役類の特性が等しいか判定する。
@@ -281,3 +293,4 @@ class ConjugacyCount(object):
         if self.conjugacy_count != len(other.conjugacy_count): return False
         return all(a.equal_to(b) for (a,b) 
                    in zip(self.conjugacy_count, other.conjugacy_count))
+    
