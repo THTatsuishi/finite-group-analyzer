@@ -7,6 +7,7 @@ sys.path.append('../')
 from application.calc import matcal
 from application.calc.group import MasterGroup, Group
 from application.controller import ConsoleController
+from application.calc.calctools import prime_factorize
 ############
 ############ 以降を編集する
 ############ ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
@@ -81,5 +82,5 @@ for group in normal_list:
     print(result.is_valid)
     print(result.quotient)
     
-
+print(prime_factorize(60))
 
