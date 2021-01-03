@@ -5,9 +5,8 @@ import sys
 import numpy
 sys.path.append('../')
 from application.calc import matcal
-from application.calc.group import MasterGroup, Group
+from application.calc.group import MasterGroup
 from application.controller import ConsoleController
-from application.calc.calctools import prime_factorize
 ############
 ############ 以降を編集する
 ############ ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
@@ -75,12 +74,7 @@ master = MasterGroup(result.value)
 master.group_initial  = "g"
 g0 = master.maximal_group
 g1 = master.trivial_group
-normal_list = g0.all_normalsub
-for group in normal_list:
-    result = g0.study_quotient_decomposition(group)
-    print(group.name, group.order)
-    print(result.is_valid)
-    print(result.quotient)
-    
-print(prime_factorize(60))
+groups = g0.all_normalsub
+for group in groups:
+    print(group)
 

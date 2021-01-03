@@ -3,7 +3,9 @@
 """
 import itertools
 import numpy
-from .calctools import calc_divisor, CartesianProduct, QuotientDecomposition
+from .calctools import calc_divisor
+from .groupstructure import CartesianProduct, QuotientDecomposition
+from .groupstructure import DirectProduct, SemidirectProduct
 from .matcal import CayleyTable
 from .conjugacy import ConjugacyClass, ConjugacyCount
 
@@ -561,6 +563,9 @@ class Group(object):
         self._is_solvable = None
         self._all_normalsub = None
         self._is_simple = None
+        self._isomorphic = None
+        self._direct_product = None
+        self._semidirect_product = None
     
     def __str__(self):
         return f'{self.name}: {tuple(sorted(list(self.elements)))}'
@@ -861,7 +866,58 @@ class Group(object):
         """
         if self._is_simple is None:
             self._is_simple = self._calc_is_simple()
-        return self._is_simple    
+        return self._is_simple
+    
+    def isomorphic(self) -> str:
+        """
+        この群の群同型を表す。
+        可換群は、必ず同定される。
+        非可換群は、名付けられた有名ないくつかの群と同型ならば同定される。
+        同定されていない場合には、"?"となる。
+
+        Returns
+        -------
+        str
+            群同型の表示。
+
+        """
+        if self._isomorphic is None:
+            self._isomorphic = self._find_isomorphic()
+        return self._isomorphic
+    
+    @property
+    def direct_product(self) -> 'tuple[DirectProduct]':
+        """
+        この群の可能な直積分解の一覧。
+        ただし、可換群は完全に同定可能なため、ここでは分解不可能とする。
+
+        Returns
+        -------
+        'tuple[DirectProduct]':
+            直積分解の一覧。
+            分解不可能な場合は空リスト。
+
+        """
+        if self._direct_product is None:
+            self._direct_product = self._find_direct_product()
+        return self._direct_product
+    
+    @property
+    def semidirect_product(self) -> 'tuple[SemidirectProduct]':
+        """
+        この群の可能な右半直積分解の一覧。
+        ただし、可換群は完全に同定可能なため、ここでは分解不可能とする。
+
+        Returns
+        -------
+        'tuple[SemidirectProduct]'
+            半直積分解の一覧。
+            分解不可能な場合は空リスト。
+
+        """
+        if self._semidirect_product is None:
+            self._semidirect_product = self._find_semidirect_product()
+        return self._semidirect_product
 
     def has_same_master(self, other: 'Group') -> bool:
         return self.master is other.master
