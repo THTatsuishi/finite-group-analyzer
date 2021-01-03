@@ -1,7 +1,8 @@
 """
-数値計算に使用する関数。
+数値計算に使用する関数など。
 """
 import numpy
+import collections
 from enum import Enum, auto
 
 def calc_divisor(a: int, include_one: bool) -> 'tuple[int]':
@@ -37,6 +38,35 @@ def calc_divisor(a: int, include_one: bool) -> 'tuple[int]':
            div_set = div_set | {div,quot}
        div += 1
     return tuple(sorted(list(div_set),reverse=True))
+
+def prime_factorize(n: int):
+    """
+    正の整数を素因数分解する。
+
+    Parameters
+    ----------
+    n : int
+        正の整数。
+
+    Returns
+    -------
+    TYPE
+        DESCRIPTION.
+
+    """
+    prime_list = []
+    while (n % 2 == 0):
+        prime_list.append(2)
+        n //= 2
+    f = 3
+    while (f * f <= n):
+        if (n % f == 0):
+            prime_list.append(f)
+            n //= f
+        else:
+            f += 2
+    if n != 1: prime_list.append(n)
+    return collections.Counter(prime_list)
 
 class CartesianProduct(object):
     def __init_(self, product_type, group):
