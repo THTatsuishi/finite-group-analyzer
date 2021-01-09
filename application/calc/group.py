@@ -8,6 +8,7 @@ from .groupstructure import CartesianProduct, QuotientDecomposition
 from .groupstructure import DirectProduct, SemidirectProduct
 from .matcal import CayleyTable
 from .conjugacy import ConjugacyClass, ConjugacyCount
+from .identifier import GroupIdentifier
 
 class MasterGroup(object):
     """
@@ -868,6 +869,7 @@ class Group(object):
             self._is_simple = self._calc_is_simple()
         return self._is_simple
     
+    @property
     def isomorphic(self) -> str:
         """
         この群の群同型を表す。
@@ -882,7 +884,7 @@ class Group(object):
 
         """
         if self._isomorphic is None:
-            self._isomorphic = self._find_isomorphic()
+            self._isomorphic = GroupIdentifier.find_isomorphic(self)
         return self._isomorphic
     
     @property
