@@ -203,21 +203,21 @@ class ConjugacyCount(object):
 
     """
     def __init__(self, conjugacy_count_units: 'list[ConjugacyCountUnit]'):
-        self._conjugacy_count = tuple(sorted(conjugacy_count_units))
+        self._count = tuple(sorted(conjugacy_count_units))
         
     def __str__(self):
         result = "("
-        num = len(self.conjugacy_count)
+        num = len(self.count)
         for i in range(num):
             if i == 0:
-                result += f'{self.conjugacy_count[i]}'
+                result += f'{self.count[i]}'
             else:
-                result += f', {self.conjugacy_count[i]}'
+                result += f', {self.count[i]}'
         result += ")"
         return result
         
     @property
-    def conjugacy_count(self) -> 'tuple[ConjugacyCountUnit]':
+    def count(self) -> 'tuple[ConjugacyCountUnit]':
         """
 
         Returns
@@ -227,7 +227,7 @@ class ConjugacyCount(object):
             位数 > 要素数 の優先順位で昇順にソートされている。
 
         """
-        return self._conjugacy_count             
+        return self._count             
     
     @staticmethod
     def create_from_conjugacy_classes(
@@ -272,7 +272,7 @@ class ConjugacyCount(object):
                           for unit_data in data]
         return ConjugacyCount(unit_data_list)
     
-    def is_equivalent_to(self, other: 'ConjugacyCount') -> bool:
+    def equal_to(self, other: 'ConjugacyCount') -> bool:
         """
         共役類の特性が等しいか判定する。
 
@@ -289,8 +289,7 @@ class ConjugacyCount(object):
             False:
                 それ以外。
 
-        """
-        if self.conjugacy_count != len(other.conjugacy_count): return False
+        """       
+        if len(self.count) != len(other.count): return False        
         return all(a.equal_to(b) for (a,b) 
-                   in zip(self.conjugacy_count, other.conjugacy_count))
-    
+                   in zip(self.count, other.count))
