@@ -139,8 +139,21 @@ class MasterGroup(object):
         if self._trivial_group is None:
             self._trivial_group = self.create_group({self._identity_index})
         return self._trivial_group
-    
+        
     def naming_group(self, group: 'Group'):
+        """
+        指定の群に自動的に名前を付ける。
+
+        Parameters
+        ----------
+        group : 'Group'
+            名付ける対象の群。
+
+        Returns
+        -------
+        None.
+
+        """
         name = f'{self.group_initial}{self._group_count}'
         group.name = name
     
@@ -567,6 +580,7 @@ class Group(object):
         self._isomorphic = None
         self._direct_product = None
         self._semidirect_product = None
+        self._max_element_order = None
     
     def __str__(self):
         return f'{self.name}: {tuple(sorted(list(self.elements)))}'
@@ -873,9 +887,8 @@ class Group(object):
     def isomorphic(self) -> str:
         """
         この群の群同型を表す。
-        可換群は、必ず同定される。
+        可換群は必ず同定される。
         非可換群は、名付けられた有名ないくつかの群と同型ならば同定される。
-        同定されていない場合には、"?"となる。
 
         Returns
         -------
@@ -886,6 +899,23 @@ class Group(object):
         if self._isomorphic is None:
             self._isomorphic = GroupIdentifier.find_isomorphic(self)
         return self._isomorphic
+    
+    @isomorphic.setter
+    def isomorphic(self, symbol: str):
+        """
+        この群と同型な群を表す記号を設定する。
+
+        Parameters
+        ----------
+        symbol : str
+            群同型の表示。
+
+        Returns
+        -------
+        None.
+
+        """
+        self._isomorphic = str
     
     @property
     def direct_product(self) -> 'tuple[DirectProduct]':
@@ -920,6 +950,37 @@ class Group(object):
         if self._semidirect_product is None:
             self._semidirect_product = self._find_semidirect_product()
         return self._semidirect_product
+
+    @property
+    def is_trivial(self) -> bool:
+        """
+
+        Returns
+        -------
+        bool
+            この群が自明群であるか。
+            True:
+                自明群である。
+            False:
+                自明群でない。
+
+        """
+        return self.equal_to(self.master.trivial_group)
+    
+    @property
+    def max_element_order(self) -> int:
+        """
+        
+        Returns
+        -------
+        int
+            この群の要素の位数の最大値。
+
+        """
+        if self._max_element_order is None:
+            self._max_element_order = max(
+                self.master.index_order(g) for g in self.elements)
+        return self._max_element_order
 
     def has_same_master(self, other: 'Group') -> bool:
         return self.master is other.master
@@ -1082,6 +1143,26 @@ class Group(object):
             return QuotientDecomposition.create_invalid()
         quotient = self.master.create_group(closure)
         return QuotientDecomposition.create_valid(quotient)
+    
+    def elements_of_order(self, order: int) -> 'tuple[int]':
+        """
+        指定の位数を持った要素の一覧を返す。
+        並び順は担保しない。
+
+        Parameters
+        ----------
+        order : int
+            要素の位数。
+        
+        Returns
+        -------
+        tuple[int]
+            指定の位数を持った要素の一覧。
+            該当する要素が存在しない場合には、空のタプル。
+
+        """
+        return tuple(g for g in self.elements 
+                     if self.master.index_order(g) == order)
     
     def _calc_cayley_table(self) -> numpy.ndarray:
         """
@@ -1251,35 +1332,7 @@ class Group(object):
         # 可換群は、位数が素数なら単純群、素数でなければ単純群でない  
         if self.is_abelian:
             return (True 
-                    if len(self.master.divisor_of(self.order)) in {1,2} 
+                    if len(self.master.divisor_of(self.order)) in (1,2) 
                     else False)
         # 非可換群は、全ての正規部分群を生成して確認する
-        return True if len(self.all_normalsub) in {1,2} else False
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-        
+        return True if len(self.all_normalsub) in (1,2) else False

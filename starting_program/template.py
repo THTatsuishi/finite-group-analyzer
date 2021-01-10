@@ -19,32 +19,32 @@ from application.calc.conjugacy import ConjugacyCount
 # 生成元は numpy.array() で定義すること
 # 複素数も使用可能
 
-# gen1 = numpy.array([[0,-1,0],
-#                     [1,0,0],
-#                     [0,0,1]])
+gen1 = numpy.array([[1j,0,0],
+                    [0,1,0],
+                    [0,0,1]])
 
-# gen2 = numpy.array([[1,0,0],
-#                     [0,0,1],
-#                     [0,1,0]])
+gen2 = numpy.array([[1,0,0],
+                    [0,0,1j],
+                    [0,1,0]])
 
 
 ###### [位数:6n^2] Delta(6n^2) の生成元
-n = 4
-p = numpy.exp(2*numpy.pi*1j / float(n))
-q = numpy.exp(-2*numpy.pi*1j / float(n))
-gen1 = numpy.array([[0,1,0],
-                    [0,0,1],
-                    [1,0,0]])
-gen2 = numpy.array([[0,0,1],
-                    [0,1,0],
-                    [1,0,0]])
-gen3 = numpy.array([[p,0,0],
-                    [0,q,0],
-                    [0,0,1]])
-gen4 = numpy.array([[1,0,0],
-                    [0,p,0],
-                    [0,0,q]])
-generators = [gen1,gen2,gen3,gen4]
+# n = 8
+# p = numpy.exp(2*numpy.pi*1j / float(n))
+# q = numpy.exp(-2*numpy.pi*1j / float(n))
+# gen1 = numpy.array([[0,1,0],
+#                     [0,0,1],
+#                     [1,0,0]])
+# gen2 = numpy.array([[0,0,1],
+#                     [0,1,0],
+#                     [1,0,0]])
+# gen3 = numpy.array([[p,0,0],
+#                     [0,q,0],
+#                     [0,0,1]])
+# gen4 = numpy.array([[1,0,0],
+#                     [0,p,0],
+#                     [0,0,q]])
+# generators = [gen1,gen2,gen3,gen4]
 
 
 ####
@@ -53,7 +53,7 @@ generators = [gen1,gen2,gen3,gen4]
 # 例えば, 生成元が 3個 ならば
 # generators = [gen1,gen2,gen3]
 
-#generators = [gen1,gen2]
+generators = [gen1,gen2]
 
 ####
 #### STEP3 群の位数の最大値[maximal]を決定する
@@ -77,7 +77,8 @@ g0 = master.maximal_group
 g1 = master.trivial_group
 g_list = g0.all_normalsub
 for group in g_list:
-    print(group.isomorphic, group.is_abelian)
+    print(group.isomorphic)
+
     
     
     
