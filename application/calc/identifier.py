@@ -99,7 +99,7 @@ class GroupIdentifier(object):
                     decomposed_step2.append(group1)
                     continue
                 # 分解
-                prime = prime_dict.keys()[0]
+                prime = sorted(prime_dict.keys())[0]
                 power = prime_dict[prime]
                 target_order = prime ** power
                 index = group1.elements_of_order(target_order)[0]

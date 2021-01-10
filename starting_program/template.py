@@ -7,7 +7,7 @@ sys.path.append('../')
 from application.calc import matcal
 from application.calc.group import MasterGroup
 from application.controller import ConsoleController
-
+from application.namedgroup.ggen import NamedGroupGenerator
 
 ############
 ############ 以降を編集する
@@ -28,23 +28,7 @@ from application.controller import ConsoleController
 #                     [0,1,0]])
 
 
-###### [位数:6n^2] Delta(6n^2) の生成元
-n = 7
-p = numpy.exp(2*numpy.pi*1j / float(n))
-q = numpy.exp(-2*numpy.pi*1j / float(n))
-gen1 = numpy.array([[0,1,0],
-                    [0,0,1],
-                    [1,0,0]])
-gen2 = numpy.array([[0,0,1],
-                    [0,1,0],
-                    [1,0,0]])
-gen3 = numpy.array([[p,0,0],
-                    [0,q,0],
-                    [0,0,1]])
-gen4 = numpy.array([[1,0,0],
-                    [0,p,0],
-                    [0,0,q]])
-generators = [gen1,gen2,gen3,gen4]
+generators = NamedGroupGenerator.Delta_3n_2(6)
 
 
 ####
@@ -80,11 +64,5 @@ for group in g_list:
     print(group.isomorphic)
 
 
-    
-    
-    
-    
-    
-    
     
     
