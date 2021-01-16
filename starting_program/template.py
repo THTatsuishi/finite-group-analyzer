@@ -4,10 +4,8 @@
 import sys
 import numpy
 sys.path.append('../')
-from application.calc import matcal
-from application.calc.group import MasterGroup
-from application.controller import ConsoleController
 from application.namedgroup.ggen import NamedGroupGenerator
+from application.service import AppServise
 
 ############
 ############ 以降を編集する
@@ -52,17 +50,9 @@ maximal = 2000
 ############ 編集はここまで
 zero_base = 0.0001
 
-ctrl = ConsoleController()
-matlist = matcal.generate_group(generators, zero_base, maximal, ctrl).value
-result = matcal.calc_cayleytable(matlist, zero_base, ctrl)
-master = MasterGroup(result.value)
-master.group_initial  = "g"
-g0 = master.maximal_group
-g1 = master.trivial_group
-g_list = g0.all_normalsub
-for group in g_list:
-    print(group.isomorphic)
-
+    
+app = AppServise(generators, zero_base, maximal)
+app()
 
     
     
