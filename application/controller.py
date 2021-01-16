@@ -11,6 +11,23 @@ class Controller(metaclass = ABCMeta):
     
     """
     @abstractmethod
+    def message(self, text: str):
+        """
+        メッセージを表示。
+
+        Parameters
+        ----------
+        text : str
+            DESCRIPTION.
+
+        Returns
+        -------
+        None.
+
+        """
+        pass
+    
+    @abstractmethod
     def calc_start(self, text: str):
         """
         計算の開始を把握するためのメソッド。
@@ -79,6 +96,8 @@ class ConsoleController(Controller):
     コンソール出力のみを扱うコントローラー。
     
     """
+    def message(self, text: str):
+        print(text)
     def calc_start(self, text: str):
         print(text)
     def calc_progress(self, text: str):

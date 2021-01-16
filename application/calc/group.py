@@ -139,6 +139,38 @@ class MasterGroup(object):
         if self._trivial_group is None:
             self._trivial_group = self.create_group({self._identity_index})
         return self._trivial_group
+    
+    @property
+    def all_groups(self) -> 'tuple[Group]':
+        """
+        
+        Returns
+        -------
+        tuple[Group]
+            作成された群の一覧。
+
+        """
+        return tuple(self._group_storage)
+
+    def name_to_group(self, name: str) -> 'Group':
+        """
+        指定の名前を持つ群を返す。
+
+        Parameters
+        ----------
+        name : str
+            群の名前。
+
+        Returns
+        -------
+        Group :
+            指定の名前をもつ群オブジェクト。
+            該当する群が存在しない場合は None。
+
+        """
+        for g in self._group_storage:
+            if g.name == name: return g
+        return None
         
     def naming_group(self, group: 'Group'):
         """
