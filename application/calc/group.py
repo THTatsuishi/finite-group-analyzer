@@ -1369,3 +1369,9 @@ class Group(object):
                     else False)
         # 非可換群は、全ての正規部分群を生成して確認する
         return True if len(self.all_normalsub) in (1,2) else False
+    
+    def _find_direct_product(self) -> 'tuple[DirectProduct]':
+        raise NotImplementedError()
+        
+    def _find_semidirect_product(self) -> 'tuple[SemidirectProduct]':
+        raise NotImplementedError()

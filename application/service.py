@@ -1,6 +1,7 @@
 """
 プログラム全体の処理を担う。
 """
+import traceback;
 from application.controller import ConsoleController
 from application.calc import matcal
 from application.calc.group import MasterGroup
@@ -27,12 +28,14 @@ class AppServise(object):
             "Derived": self._cmd_derived, # 導来部分群
             "DerivedSeries": self._cmd_derived_series, # 導来列
             "Normal": self._cmd_normal, # 正規部分群の一覧
+            "Decompose": self._cmd_decompose, # 直積/半直積分解
             }
         
     _errmsg_format = "書式が不適切です。"
     _errmsg_cmd = "コマンド名が不適切です。"
     _errmsg_expr = "引数が不適切です。"
-    _errmsg_exec = "コマンド実行エラー。"
+    _errmsg_exec = "プログラムエラー：実行時エラー"
+    _errmsg_not_implemented = "プログラムエラー：未完成"
     
     def __init__(self, generators, zero_base, maximal):
         self._cmd_func_dict = self._create_cmd_func_dict()
@@ -77,7 +80,11 @@ class AppServise(object):
         # コマンド関数実行
         try:
             return cmd_func(group)
+        except NotImplementedError:
+            print(traceback.format_exc())
+            return self._errmsg_not_implemented
         except Exception:
+            print(traceback.format_exc())
             return self._errmsg_exec
     
     def _generate_master(self, generators, zero_base, maximal):
@@ -237,8 +244,22 @@ class AppServise(object):
             )
         for g in normals:
             text += f'\n{g.name}\t{g.order}\t{g.isomorphic}'
-        return text   
-
+        return text
+    
+    def _cmd_decompose(self, group):
+        directList = group.direct_product
+        semiList = group.semidirect_product
+        text = (
+            f'{group.name} の直積/半直積への分解：\n'+
+            "(\'x\' means \'\\times\')"+
+            "(\'r\' means \'\\rtimes\')"
+            )
+        for data in directList:
+            text += f'\n{data.left} x {data.right}'
+        for data in semiList:
+            text += f'\n{data.left} r {data.right}'
+        return text
+    
 class CmdExprPair(object):
     def __init__(self, has_value: bool, cmd: str, expr: str):
         self._has_value = has_value
