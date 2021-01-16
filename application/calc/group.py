@@ -148,9 +148,10 @@ class MasterGroup(object):
         -------
         tuple[Group]
             作成された群の一覧。
+            位数の降順に並ぶ。
 
         """
-        return tuple(self._group_storage)
+        return tuple(sorted(self._group_storage,reverse=True))
 
     def name_to_group(self, name: str) -> 'Group':
         """

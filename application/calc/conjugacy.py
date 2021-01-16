@@ -40,7 +40,10 @@ class ConjugacyClass(object):
         return self.order < other.order
     
     def __str__(self):
-        return f'({self.order}, {self.element_num}): {set(self.elements)}'
+        order = self.order
+        num = self.element_num
+        elements = sorted(list(self.elements))
+        return f'({order}, {num}): {elements}'
     
     @property
     def elements(self) -> 'frozenset[int]':
