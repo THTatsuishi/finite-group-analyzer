@@ -29,10 +29,10 @@ class AppServise(object):
             "IsAbelian": self._cmd_is_abelian,
             # 完全群であるか
             "IsPerfect": self._cmd_is_perfect,
-            # 可解群であるか
-            "IsSolvable": self._cmd_is_solvable,
             # 単純群であるか
             "IsSimple": self._cmd_is_simple,
+            # 可解群であるか
+            "IsSolvable": self._cmd_is_solvable,
             # 中心
             "Center": self._cmd_center,
             # 中心化群
@@ -216,15 +216,15 @@ class AppServise(object):
         result = "完全群" if group.is_perfect else "不完全群"
         text = (f'{group.name} は {result} である。\n')
         return text
-    
-    def _cmd_is_solvable(self, group):
-        result = "可解群" if group.is_solvable else "非可解群"
-        text = (f'{group.name} は {result} である。\n')
-        return text
 
     def _cmd_is_simple(self, group):
         result = "ある" if group.is_solvable else "ない"
         text = (f'{group.name} は 単純群で{result}。\n')
+        return text
+    
+    def _cmd_is_solvable(self, group):
+        result = "可解群" if group.is_solvable else "非可解群"
+        text = (f'{group.name} は {result} である。\n')
         return text
 
     def _cmd_center(self, group):

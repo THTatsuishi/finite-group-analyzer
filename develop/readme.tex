@@ -17,10 +17,10 @@
 \newcommand{\re}[1]{\text{Re}#1}
 %-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%
 \title{
-有限群解析プログラムの説明書
+有限群解析プログラム
 }
 \author{
-作成者: 立石卓也
+作製: 立石卓也
 }
 
 \begin{document}
@@ -28,10 +28,42 @@
 %-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%
 \maketitle
 %-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%
-\section{コマンド一覧}
-解析画面で用いるコマンドを記す.
-全てのコマンドは「コマンド名[引数]」となっている.
+\section{利用規約}
+本プログラムやその計算結果を用いたことによるいかなる不利益に対して, 作製者は一切の責任を負いません.
+本プログラムを研究等に使用する場合には, 本プログラムの計算結果を根拠とはせず, 見積もり程度にとどめて下さい.
 
+\paragraph{本プログラムの配布場所}
+https://github.com/THTatsuishi/finite-group-analyzer
+
+\section{概要}
+有限群解析プログラム(finite-group-analyzer)は, 有限群の生成および生成された群の構造を調べるためのプログラムである.
+本プログラムは, 主に以下の機能を有する.
+\begin{itemize}
+\item いくつかの複素行列を生成元として, 有限群を生成する\\
+全ての元のあらゆる組み合わせの積をとり, 新しい元が現れなくなるまで生成を続ける.
+ただし, 元の数が予め定めた値を超えた場合には, 群が有限では閉じないものと判定する.
+\item 生成された有限群の性質を調べる\\
+共役類, 可換性, 群の中心, 正規部分群, 群同型など.
+\item 生成された群の直積分解や半直積分解を調べる
+\end{itemize}
+
+\subsection{具体的な使用手順}
+
+
+
+
+\section{資料内での用語}
+\paragraph{master}
+ユーザーが指定した生成子から生成された群.
+本プログラムでは, この群とその部分群の構造を調べることができる.
+
+\paragraph{コマンド}
+解析画面上で使用する, 解析を実行するためのプログラムに対する命令文.
+全てのコマンドは「コマンド名[引数]」という形式をとる.
+
+\section{コマンド一覧}
+\paragraph{?[group]}
+``group''の概要を表示する。
 
 \paragraph{Element[group]}
 ``group''の要素を表示する.
@@ -39,9 +71,69 @@
 \paragraph{Table[group]}
 ``group''の乗積表を表示する.
 ただし, 位数が大きい場合には一部のみを表示する.
+単位元は必ず``0''となる.
 
-\paragraph{ConjugacyClass[group]}
-``group''の共役類を「位数 要素数 [要素の一覧]」として表示する.
+\paragraph{ConjClass[group]}
+``group''の共役類（位数, 要素数, 要素）の一覧を表示する.
+
+\paragraph{ConjCount[group]}
+``group''の共役類のカウント（位数, 要素数, 重複度）の一覧を表示する.
+
+\paragraph{Isomorphic[group]}
+``group''が名前の付いた群と同型の場合に, 群同型を表示する.
+
+\paragraph{IsAbelian[group]}
+``group''が可換群であるかを表示する.
+
+\paragraph{IsPerfect[group]}
+``group''が完全群であるかを表示する.
+
+\paragraph{IsSimple[group]}
+``group''が単純群であるかを表示する.
+
+\paragraph{IsSolvable[group]}
+``group''が可解群であるかを表示する.
+
+\paragraph{Center[group]}
+``group''の中心を表示する.
+
+\paragraph{Centrizer[group]}
+masterにおける``group''の中心化群を表示する.
+
+\paragraph{Derived[group]}
+``group''の導来部分群を表示する.
+
+\paragraph{DerivedSeries[group]}
+``group''の導来列を表示する.
+
+\paragraph{Normal[group]}
+``group''の全ての正規部分群を表示する.
+
+\paragraph{DirectDecompose[group]}
+``group''の全ての可能な直積分解を表示する.
+\begin{equation}
+\text{group} = \text{left} \times \text{right}
+\end{equation}
+として, 二つの群に分解する.
+位数の大きい方の群を(left)とする.
+分解後の群は, さらに分解可能である場合がある.
+
+\paragraph{SemidirectDecompose[group]}
+``group''を半直積に分解する.
+直積は含まず,
+\begin{equation}
+\text{group} = \text{left} \rtimes \text{right}
+\end{equation}
+として, 右半直積として表現する..
+ただし, 商群(right)はmasterの元による共役変換の範囲で一意である.
+
+\paragraph{Decompose[group]}
+``group''の直積分解および半直積分解を表示する.
+
+\subsection{未実装}
+
+
+
 
 
 
