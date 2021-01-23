@@ -26,17 +26,24 @@
 \begin{document}
 %-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%
 \maketitle
+\tableofcontents
 %-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%
-\section{利用規約}
-本プログラムやその計算結果を用いたことによるいかなる不利益に対して, 作製者は一切の責任を負いません.
-本プログラムを研究等に使用する場合には, 本プログラムの計算結果を根拠とはせず, 見積もり程度にとどめて下さい.
+\newpage
+\section{本プログラムについて}
 
-\section{利用方法}
+\subsection{利用規約}
+本プログラムやその計算結果を用いたことによるいかなる不利益に対して, 作製者は一切の責任を負いません.
+
+\subsection{利用方法} \label{sec:way}
 本プログラムは, Python 3.x で書かれた一連のソースファイルです.
-利用にはPython 3.x の実行環境が必要となります.
+利用にはPython 3.x の実行環境, および標準ライブラリが必要となります.
 Pythonの実行環境は各自で用意してください.
 
-本プログラムのソースファイルは, 以下のURLから入手して下さい.
+本プログラムは, 使用するにあたりPythonのソースコードをユーザー自身が編集する必要があります.
+そのため, Pythonのコードを書くための基本的な知識, および数値計算用ライブラリNumPyの知識が必要となります.
+知識の目安としては, 3次程度の複素正方行列を記述できれば十分です.
+
+本プログラムのソースファイルは, 以下のURLから入手することができます.
 ダウンロードしたzipファイルを解凍後, 特定のソースファイルをPythonで実行することで使用できます.
 インストールは不要です.
 
@@ -46,82 +53,116 @@ Pythonの実行環境は各自で用意してください.
 \item 上記URLにアクセス後, 「Code」 → 「Download Zip」 から zipファイルをダウンロード
 \end{itemize}
 
-\section{概要}
-有限群解析プログラム(finite-group-analyzer)は, 有限群の生成および生成された群の構造を調べるためのプログラムである.
-本プログラムは, 主に以下の機能を有する.
+\subsection{概要}
+有限群解析プログラム(finite-group-analyzer)は, 有限群の生成および生成された群の構造を調べるためのプログラムです.
+本プログラムは, 主に以下の機能を有しています.
 \begin{itemize}
-\item いくつかの複素行列を生成元として, 有限群を生成する\\
+\item いくつかの複素行列を生成元として, 有限群を生成する. \\
 全ての元のあらゆる組み合わせの積をとり, 新しい元が現れなくなるまで生成を続ける.
 ただし, 元の数が予め定めた値を超えた場合には, 群が有限では閉じないものと判定する.
-\item 生成された有限群の性質を調べる\\
+\item 生成された有限群の性質を調べる. \\
 共役類, 可換性, 群の中心, 正規部分群, 群同型など.
-\item 生成された群の直積分解や半直積分解を調べる
+\item 生成された群の直積分解や半直積分解を調べる.
 \end{itemize}
+本プログラムでは, 初めに行列で与えられた生成元から群を生成し, 群の乗積表を作成します.
+この計算過程では, 行列演算を繰り返すため, 行列のサイズや群の位数に応じた計算時間がかかります.
+乗積表の作成後は, 行列表現された元をナンバリングして整数に置き換えて乗積表に従った演算を行うことで, 極めて高速な計算を実現しています.
+基本的に, 解析画面上での行う計算はほとんど一瞬で完了します.
 
 \subsection{具体的な使用手順}
+\begin{enumerate}
+\item Python 3.x の実行環境を整える. \\
+一つの選択肢として, Anacondaをインストールして統合開発環境Spyderを用いる方法があります.
+\item 本プログラムのソースファイルを入手する（\S\ref{sec:way}参照）.
+\item finite-group-analyzer/starting\_program/template.py をコピーし, 名前を変更して同じディレクトリに保存する. \\
+ファイル名は半角英数字, ハイフン(-), アンダースコア(\_)のみの使用を推奨. \\
+コピー後のファイルを「起点ファイル」と呼ぶ.
+\item 起点ファイルのソースコードを編集する. \\
+ソースコード内の説明に従い, 以下の値を設定する.
+	\begin{itemize}
+	\item 生成元となる行列を一つ以上
+	\item 「有限では閉じない」と判定するための要素数の上限値
+	\item 浮動小数点の計算誤差を補正するための許容誤差（基本的に編集不要）
+	\end{itemize}
+\item 起点ファイルを実行する. \\
+→ 有限群が正しく生成されない場合はエラーが生じる.
+	\begin{itemize}
+	\item Pythonのコードの書き方が誤っている（特にインデントに注意せよ）
+	\item 群が有限で閉じない
+	\end{itemize}
+\item 群が正しく生成された場合, 解析用画面が開く. \\
+以降操作は解析画面上で行う.
+\item 解析画面のコマンド入力欄に解析用のコマンドを入力する.
+\item 解析を終了したら, 解析画面を閉じる.
+\end{enumerate}
 
-
-
-
+%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%
 \section{資料内での用語}
 \paragraph{master}
 ユーザーが指定した生成子から生成された群.
-本プログラムでは, この群とその部分群の構造を調べることができる.
+本プログラムでは, この群とその部分群について調べることができる.
 
 \paragraph{コマンド}
 解析画面上で使用する, 解析を実行するためのプログラムに対する命令文.
-全てのコマンドは「コマンド名[引数]」という形式をとる.
+全てのコマンドは, 半角英数字で「コマンド名[引数]」という形式をとる.
+大文字と小文字を区別する.
 
+%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%
 \section{コマンド一覧}
+
+\subsection{引数に群を一つとるコマンド}
+Command[group]の形式をとり, ``group''で指定された群に関する処理を行う.
+
 \paragraph{?[group]}
-``group''の概要を表示する。
+群の概要を表示する.
+群の同定を行うだけであれば, このコマンドだけを使用すれば十分である.
 
 \paragraph{Element[group]}
-``group''の要素を表示する.
+群の要素を表示する.
 
 \paragraph{Table[group]}
-``group''の乗積表を表示する.
+群の乗積表を表示する.
 ただし, 位数が大きい場合には一部のみを表示する.
 単位元は必ず``0''となる.
 
 \paragraph{ConjClass[group]}
-``group''の共役類（位数, 要素数, 要素）の一覧を表示する.
+群の共役類（位数, 要素数, 要素）の一覧を表示する.
 
 \paragraph{ConjCount[group]}
-``group''の共役類のカウント（位数, 要素数, 重複度）の一覧を表示する.
+群の共役類のカウント（位数, 要素数, 重複度）の一覧を表示する.
 
 \paragraph{Isomorphic[group]}
-``group''が名前の付いた群と同型の場合に, 群同型を表示する.
+群が名前の付いた群と同型の場合に, 群同型を表示する.
 
 \paragraph{IsAbelian[group]}
-``group''が可換群であるかを表示する.
+群が可換群であるかを表示する.
 
 \paragraph{IsPerfect[group]}
-``group''が完全群であるかを表示する.
+群が完全群であるかを表示する.
 
 \paragraph{IsSimple[group]}
-``group''が単純群であるかを表示する.
+群が単純群であるかを表示する.
 
 \paragraph{IsSolvable[group]}
-``group''が可解群であるかを表示する.
+群が可解群であるかを表示する.
 
 \paragraph{Center[group]}
-``group''の中心を表示する.
+群の中心を表示する.
 
 \paragraph{Centrizer[group]}
-masterにおける``group''の中心化群を表示する.
+masterにおける群の中心化群を表示する.
 
 \paragraph{Derived[group]}
-``group''の導来部分群を表示する.
+群の導来部分群を表示する.
 
 \paragraph{DerivedSeries[group]}
-``group''の導来列を表示する.
+群の導来列を表示する.
 
 \paragraph{Normal[group]}
-``group''の全ての正規部分群を表示する.
+群の全ての正規部分群を表示する.
 
 \paragraph{DirectDecompose[group]}
-``group''の全ての可能な直積分解を表示する.
+群'の全ての可能な直積分解を表示する.
 \begin{equation}
 \text{group} = \text{left} \times \text{right}
 \end{equation}
@@ -130,18 +171,166 @@ masterにおける``group''の中心化群を表示する.
 分解後の群は, さらに分解可能である場合がある.
 
 \paragraph{SemidirectDecompose[group]}
-``group''を半直積に分解する.
+群を半直積に分解する.
 直積は含まず,
 \begin{equation}
 \text{group} = \text{left} \rtimes \text{right}
 \end{equation}
-として, 右半直積として表現する..
+として, 右半直積として表現する.
 ただし, 商群(right)はmasterの元による共役変換の範囲で一意である.
 
 \paragraph{Decompose[group]}
-``group''の直積分解および半直積分解を表示する.
+群の直積分解および半直積分解を表示する.
 
-\subsection{未実装}
+\subsection{未実装（実装を検討中）}
+
+\paragraph{Normalizer[group]}
+masterにおける群の正規化群を表示する.
+
+\paragraph{Subgroup[group]}
+群の部分群を表示する.
+ただし, 部分群はmasterの元による共役変換の範囲で一意である.
+
+%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%
+\newpage
+\section{有限群論}
+ほとんど部分で証明を書かずに命題だけを記している.
+各自で裏付けをとっていただきたい.
+特に, \uline{プログラム内で前提として使用している重要な命題を下線で示す}.
+
+\subsection{記号など}
+以下の記号は, 文中で説明なく使用する.
+\begin{itemize}
+\item $\mathbb{N}_+$：0を含まない自然数
+\item $e$：群の単位元
+\item $g^{-1}$：群の元$g$の逆元
+\item $=$, $\simeq$：集合の等価, 群の等価, 群同型など, あまり区別せずに使用する
+\item $Z_n$：$n$次の巡回群
+\item $\{\text{要素}\}$：集合
+\item $\langle\text{集合}\rangle$：(集合)を生成系として生成される群
+\end{itemize}
+
+\subsection{位数}
+\subsubsection{群の位数}
+群の要素数を指す.
+群$G$の部分群を$H \subset G$とすると, \uline{$H$の位数は$G$の位数の約数である}.
+よって, 位数が素数である群には非自明な部分群が存在しない.
+
+\subsubsection{群の元の位数}
+群$G$の元$g\in G$に対して,
+\begin{equation}
+	g^n = e,\quad n\in\mathbb{N}_+
+\end{equation}
+を満たす最小の$n$を指す.
+元の位数は群の位数の約数である.
+
+\subsection{共役類}
+\subsubsection{共役変換}
+群$G$の元を$g,h\in G$とする.
+$h$による$g$の共役変換を
+\begin{equation}
+ h g h^{-1}
+\end{equation}
+とする.
+また, $g,g'\in G$に対して
+\begin{equation}
+ g = h g' h^{-1}
+\end{equation}
+となる$h\in G$が存在するとき, $g$と$g'$は共役であるという. 
+単位元は任意の共役変換で単位元へと写されるため, 単位元と共役な元は単位元のみである.
+
+\subsubsection{共役類}
+互いに共役である元からなる集合を指す.
+
+\paragraph{共役類の元は位数が等しい}
+群Gの元を$a,b,g \in G$とし, $ b = gag^{-1}とする.$
+$a$の位数を$n\in\mathbb{N}_+$とする.
+\begin{equation}
+ b^n = (gag^{-1})^n = ga^{n}g = geg^{-1} = e
+\end{equation}
+である
+
+\begin{itemize}
+\item 共役類の要素数は群の位数の約数である.
+\item 異なる共役類は共通部分を持たない. \\
+群Gの任意の共役類$C_1, C_2$に対して$C_1 \cup C_2 = \emptyset$.
+\item 群は, 共役類の共通部分のない和集合として分解される. \\
+群Gの共役類を$C_1,\dots,C_n$, $n\in\mathbb{N}_+$とすると, $G = C_1 \cup \cdots \cup C_n$.
+\item 単位元は自身のみで共役類を構成する.
+\item 可換群は, 全ての元が自身のみで共役類を構成する.
+\end{itemize}
+これらより, 位数が素数の群は可換群である.
+さらに, \uline{その群は巡回群である}.
+
+\subsubsection{共役類のカウント}
+※極めて重要
+
+\subsection{群の中心}
+\subsubsection{中心}
+群$G$の中心$Z(G)$を, $G$の任意の元と可換である元の集合
+\begin{equation}
+Z(G) = \{z \in G | zg = gz \left(g \in G\right)\}
+\end{equation}
+とする.
+$Z(G)$は群をなす.
+
+\subsubsection{中心化群}
+
+\subsection{正規部分群}
+\subsubsection{正規部分群}
+正規部分群として自明な正規部分群のみを持つ群を指す.
+
+\subsubsection{正規化群}
+
+\subsection{導来部分群}
+\subsubsection{交換子}
+群$G$の元$g,h \in G$の交換子$[g,h]$を
+\begin{equation}
+	[g, h] \equiv g h g^{-1} h^{-1}
+\end{equation}
+とする.
+$g,h$が可換であるとき, 
+\begin{equation}
+	[g, h] = e
+\end{equation}
+となる.
+
+\subsubsection{導来部分群}
+交換子部分群とも呼ばれる.
+群$G$の導来部分群$[G,G]$を, $G$の交換し全体を生成系として生成される群
+\begin{equation}
+	[G, G] \equiv \langle \{ [g,h] | g,h \in G\} \rangle
+\end{equation}
+とする.
+\begin{equation}
+	[G, G] \triangleleft G
+\end{equation}
+である.
+交換子部分群が自明群である群を可換群と呼ぶ.
+交換子部分群が自身と一致する群を完全群と呼ぶ.
+
+
+\subsubsection{導来列}
+群$G$自身を0次導来部分群, $[G,G]$を一次導来部分群とし, $n$次導来部分群の導来部分群を$(n+1)$次導来部分群と呼ぶ.
+$G$の$n$次導来部分群を$G^{(n)}$として表す.
+\begin{equation}
+\begin{split}
+&G^{(0)} \equiv G, \\
+&G^{(1)} \equiv [G,G] = [G^{(0)},G^{(0)}], \\
+&G^{(n)} \equiv [G^{(n-1)},G^{(n-1)}].
+\end{split}
+\end{equation}
+有限群では, $G^{(n)}$が完全群となるような有限の$n\in\mathbb{N}$が存在する.
+$n\in\mathbb{N}$を$G^{(n)}$が完全群となる最小の値とする.
+このとき,
+\begin{equation}
+G^{(n)} \triangleleft \dots \triangleleft G^{(1)} \triangleleft G^{(0)}
+\end{equation}
+を$G$の導来列と呼ぶ.
+導来列が自明群で終わる群を可解群と呼ぶ.
+
+
+
 
 
 
