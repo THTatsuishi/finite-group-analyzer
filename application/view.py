@@ -6,8 +6,8 @@ import tkinter.scrolledtext
 import tkinter.ttk
 
 class AppWindow(object):
-    def __init__(self, exec_cmd):
-        self._exec_cmd = exec_cmd
+    def __init__(self, exec_func_pointer):
+        self._exec_cmd = exec_func_pointer
         self._text_ini = "デフォルトメッセージ"
         self._cmd_count = 0
     

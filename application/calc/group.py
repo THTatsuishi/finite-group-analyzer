@@ -378,7 +378,7 @@ class MasterGroup(object):
         element_all = set(indexset)
         element_prev = set(indexset)
         n_all = len(element_all)
-        while len(element_prev) != 0:
+        while element_prev:
         # 新しいインデックスを生成
             generated = set(self.index_prod(index1,index2) for (index1,index2) 
                       in itertools.product(element_prev,indexset))
@@ -1162,7 +1162,7 @@ class Group(object):
         # 一般の場合の処理
         candidate = set(self.elements - group.elements)
         selected = set()
-        while len(candidate) != 0:
+        while candidate:
             index = sorted(candidate)[0]
             candidate.discard(index)
             indexset = selected | {index}
@@ -1234,7 +1234,7 @@ class Group(object):
         """
         c_classes = []
         remaining = set(self.elements)
-        while len(remaining) != 0:
+        while remaining:
             # 任意の要素を一つ取得
             g = list(remaining)[0]
             # 群の各元で共役変換
@@ -1335,7 +1335,7 @@ class Group(object):
         # closure の和集合を生成系として正規部分群を生成する
         normal_prev = tuple(seed)
         normal_new = []
-        while len(normal_prev) != 0:
+        while normal_prev:
             gen_list = (normal1 | normal2 for (normal1, normal2) 
                             in itertools.product(normal_prev, seed) 
                             if not (normal1 <= normal2 or normal1 >= normal2))
@@ -1379,7 +1379,7 @@ class Group(object):
         # 非自明な正規部分群
         remaining = [g for g in self.all_normalsub
                      if not g.order in (1, self.order)]
-        while len(remaining) != 0:
+        while remaining:
             group = remaining.pop(0)
             for g in remaining:
                 if group.order * g.order != self.order: continue
@@ -1395,7 +1395,7 @@ class Group(object):
         # 非自明な正規部分群
         remaining = [g for g in self.all_normalsub
                      if not g.order in (1, self.order)]
-        while len(remaining) != 0:
+        while remaining:
             group = remaining.pop(0)
             result = self.study_quotient_decomposition(group)
             if result.is_valid:

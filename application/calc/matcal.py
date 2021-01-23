@@ -182,7 +182,7 @@ def generate_group(
     element_new = []
     n_all = len(element_all)
     n_loop= 0
-    while len(element_prev) != 0:
+    while element_prev:
         if n_all > maximal:
             ctrl.calc_end(
                 "失敗：要素数が最大値(%d)を超えても群が閉じない" % maximal)
