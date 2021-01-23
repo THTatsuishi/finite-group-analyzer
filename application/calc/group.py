@@ -1172,7 +1172,7 @@ class Group(object):
                          in itertools.product(closure, group.elements)}
             candidate = candidate - generated
             selected.add(index)
-        closure =self.master.calc_closure(selected)
+        closure = self.master.calc_closure(selected)
         if len(closure)*group.order != self.order:
             return QuotientDecomposition.create_invalid()
         quotient = self.master.create_group(closure)
@@ -1371,10 +1371,7 @@ class Group(object):
         # 非可換群は、全ての正規部分群を生成して確認する
         return True if len(self.all_normalsub) in (1,2) else False
     
-    def _find_direct_product(self) -> 'tuple[DirectProduct]':
-        
-        # TODO:バグあり
-        
+    def _find_direct_product(self) -> 'tuple[DirectProduct]':       
         product_list = []
         # 非自明な正規部分群
         remaining = [g for g in self.all_normalsub
@@ -1383,8 +1380,8 @@ class Group(object):
             group = remaining.pop(0)
             for g in remaining:
                 if group.order * g.order != self.order: continue
-                result = group.study_cartesian_product(g)
-                if result.product_type.is_direct_product:
+                result = group.study_cartesian_product(g)               
+                if result.is_direct_product:
                     product_list.append(DirectProduct(group, g))
                     remaining.remove(g)
                     break
@@ -1397,8 +1394,7 @@ class Group(object):
                      if not g.order in (1, self.order)]
         while remaining:
             group = remaining.pop(0)
-            result = self.study_quotient_decomposition(group)
+            result = self.study_quotient_decomposition(group)           
             if result.is_valid:
                 product_list.append(SemidirectProduct(group,result.quotient))
-                break
         return tuple(product_list)
