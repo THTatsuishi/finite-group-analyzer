@@ -1109,17 +1109,17 @@ class Group(object):
             return CartesianProduct.create_invalid()
         # 位数の積がMasterGroupの位数の約数であるか
         order_prod = self.order * group.order
-        if not order_prod in self.master.divisor_of_order:
+        if not order_prod in self.master.divisor_of_order():
             return CartesianProduct.create_invalid()
         # 共通部分が自明であるか
-        if not len(self.elements & group.elements) == 1:
+        if len(self.elements & group.elements) != 1:
             return CartesianProduct.create_invalid()
         # デカルト積を取得
         indexset = {self.master.index_prod(g,h) for (g,h) 
                     in itertools.product(self.elements, group.elements)}
         # デカルト積が群をなすか
         closure = self.master.calc_closure(indexset)
-        if len(closure) != len(indexset):
+        if closure != indexset:
             return CartesianProduct.create_invalid()
         # ここまで満たすと、直積 or 半直積 である
         generated = self.master.create_group(closure)
@@ -1127,7 +1127,8 @@ class Group(object):
         left = group.is_normalsubgroup_of(generated)
         if left and right:
             return CartesianProduct.create_direct(generated)
-        if left: return CartesianProduct.create_left(generated)
+        if left:
+            return CartesianProduct.create_left(generated)
         return CartesianProduct.create_right(generated)
     
     def study_quotient_decomposition(self, group: 'Group'
@@ -1371,7 +1372,33 @@ class Group(object):
         return True if len(self.all_normalsub) in (1,2) else False
     
     def _find_direct_product(self) -> 'tuple[DirectProduct]':
-        raise NotImplementedError()
+        
+        # TODO:バグあり
+        
+        product_list = []
+        # 非自明な正規部分群
+        remaining = [g for g in self.all_normalsub
+                     if not g.order in (1, self.order)]
+        while len(remaining) != 0:
+            group = remaining.pop(0)
+            for g in remaining:
+                if group.order * g.order != self.order: continue
+                result = group.study_cartesian_product(g)
+                if result.product_type.is_direct_product:
+                    product_list.append(DirectProduct(group, g))
+                    remaining.remove(g)
+                    break
+        return tuple(product_list)
         
     def _find_semidirect_product(self) -> 'tuple[SemidirectProduct]':
-        raise NotImplementedError()
+        product_list = []
+        # 非自明な正規部分群
+        remaining = [g for g in self.all_normalsub
+                     if not g.order in (1, self.order)]
+        while len(remaining) != 0:
+            group = remaining.pop(0)
+            result = self.study_quotient_decomposition(group)
+            if result.is_valid:
+                product_list.append(SemidirectProduct(group,result.quotient))
+                break
+        return tuple(product_list)

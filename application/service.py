@@ -160,10 +160,11 @@ class AppServise(object):
         conj_classes = group.conjugacy_classes
         text = (
             f'{group.name} の共役類の一覧：\n'+
-            "(位数, 要素数):[要素の一覧]"
+            "位数\t要素数\t共役類"
             )
-        for c_class in conj_classes:
-            text += f'\n{c_class}'
+        for c in conj_classes:
+            elements = sorted(list(c.elements))
+            text += f'\n{c.order}\t{c.element_num}\t{elements}'
         return text
     
     def _cmd_conj_count(self, group):
@@ -240,10 +241,11 @@ class AppServise(object):
         normals = group.all_normalsub
         text = (
             f'{group.name} の正規部分群の一覧：\n'+
-            "Name\tOrder\tIsomorphic"
+            "Name\tOrder\tIsAbelian\t\tIsomorphic"
             )
         for g in normals:
-            text += f'\n{g.name}\t{g.order}\t{g.isomorphic}'
+            is_abelian = 'Abelian'if g.is_abelian else 'non'
+            text += f'\n{g.name}\t{g.order}\t{is_abelian}\t\t{g.isomorphic}'
         return text
     
     def _cmd_decompose(self, group):
@@ -251,13 +253,23 @@ class AppServise(object):
         semiList = group.semidirect_product
         text = (
             f'{group.name} の直積/半直積への分解：\n'+
-            "(\'x\' means \'\\times\')"+
-            "(\'r\' means \'\\rtimes\')"
+            "(\'x\' means \'\\times\')\n"+
+            "(\'r\' means \'\\rtimes\')\n"+
+            "Name(Order)"
             )
         for data in directList:
-            text += f'\n{data.left} x {data.right}'
+            left = data.left
+            right = data.right
+            text += (
+                f'\n{left.name}({left.order}) x {right.name}({right.order})'+
+                f'\t<==> ( {left.isomorphic} ) × ( {right.isomorphic} )'
+                )
         for data in semiList:
-            text += f'\n{data.left} r {data.right}'
+            left = data.left
+            right = data.right
+            text += (
+                f'\n{left.name}({left.order}) r {right.name}({right.order})'+
+                f'\t<==> ( {left.isomorphic} ) r ( {right.isomorphic} )')
         return text
     
 class CmdExprPair(object):

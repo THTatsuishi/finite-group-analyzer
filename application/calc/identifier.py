@@ -6,7 +6,7 @@ from ..namedgroup.gdata import NamedGroupData
 
 class GroupIdentifier(object):
     _not_exist_symbol = "?"
-    _trivial_symbol = "Id"
+    _trivial_symbol = "Z(1)"
     _cyclic_symbol = "Z"
     
     @classmethod
