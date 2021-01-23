@@ -4,7 +4,7 @@
 from enum import Enum, auto
 
 class CartesianProduct(object):
-    def __init_(self, product_type, group):
+    def __init__(self, product_type, group):
         self._product_type = product_type
         self._group = group
         
@@ -53,7 +53,7 @@ class ProductType(Enum):
     def is_valid(self) -> bool:
         return self is not ProductType.INVALID
     
-    def is_INVALID(self) -> bool:
+    def is_invalid(self) -> bool:
         return self is ProductType.INVALID
     
 class QuotientDecomposition(object):
