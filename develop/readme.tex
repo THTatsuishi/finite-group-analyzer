@@ -7,7 +7,6 @@
 \usepackage{comment}			%\begin{comment}--\end{comment}
 \usepackage{mathrsfs}			%\mathscr{--}
 \usepackage{ulem}				%underline
-
 \usepackage{layout}			%\layout
 \usepackage[dvipdfmx]{graphicx}
 \usepackage{epsfig}
@@ -15,6 +14,7 @@
 \newcommand{\Comment}[1]{\textcolor{red}{[[#1]]}}		%\Comment{--} -> [[--]]
 \newcommand{\im}[1]{\text{Im}#1}
 \newcommand{\re}[1]{\text{Re}#1}
+\newcommand{\Slash}[1]{{\ooalign{\hfil/\hfil\crcr$#1$}}}		%\Slash{--}
 %-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%
 \title{
 有限群解析プログラム
@@ -24,7 +24,6 @@
 }
 
 \begin{document}
-\newcommand{\Slash}[1]{{\ooalign{\hfil/\hfil\crcr$#1$}}}		%\Slash{--}
 %-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%
 \maketitle
 %-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%
@@ -32,8 +31,20 @@
 本プログラムやその計算結果を用いたことによるいかなる不利益に対して, 作製者は一切の責任を負いません.
 本プログラムを研究等に使用する場合には, 本プログラムの計算結果を根拠とはせず, 見積もり程度にとどめて下さい.
 
-\paragraph{本プログラムの配布場所}
-https://github.com/THTatsuishi/finite-group-analyzer
+\section{利用方法}
+本プログラムは, Python 3.x で書かれた一連のソースファイルです.
+利用にはPython 3.x の実行環境が必要となります.
+Pythonの実行環境は各自で用意してください.
+
+本プログラムのソースファイルは, 以下のURLから入手して下さい.
+ダウンロードしたzipファイルを解凍後, 特定のソースファイルをPythonで実行することで使用できます.
+インストールは不要です.
+
+\paragraph{配布場所}
+\begin{itemize}
+\item https://github.com/THTatsuishi/finite-group-analyzer
+\item 上記URLにアクセス後, 「Code」 → 「Download Zip」 から zipファイルをダウンロード
+\end{itemize}
 
 \section{概要}
 有限群解析プログラム(finite-group-analyzer)は, 有限群の生成および生成された群の構造を調べるためのプログラムである.
