@@ -13,22 +13,42 @@ class AppServise(object):
         解析画面で使用するコマンド名と処理メソッドの対応辞書を作成する。
         """
         return {
-            "?": self._cmd_overview_of, # 概要
-            "Elements": self._cmd_elements, # 要素の一覧
-            "Table": self._cmd_cayley_table, # 乗積表
-            "ConjClass": self._cmd_conj_class, # 共役類の一覧
-            "ConjCount": self._cmd_conj_count, # 共役類のカウント
-            "Isomorphic": self._cmd_isomorphic, # 群同型
-            "IsAbelian": self._cmd_is_abelian, # 可換群であるか
-            "IsPerfect": self._cmd_is_perfect, # 完全群であるか
-            "IsSolvable": self._cmd_is_solvable, # 可解群であるか
-            "IsSimple": self._cmd_is_simple, # 単純群であるか
-            "Center": self._cmd_center, # 中心
-            "Centrizer": self._cmd_centrizer, # 中心化群
-            "Derived": self._cmd_derived, # 導来部分群
-            "DerivedSeries": self._cmd_derived_series, # 導来列
-            "Normal": self._cmd_normal, # 正規部分群の一覧
-            "Decompose": self._cmd_decompose, # 直積/半直積分解
+            # 概要
+            "?": self._cmd_overview_of,
+            # 要素の一覧
+            "Elements": self._cmd_elements,
+            # 乗積表
+            "Table": self._cmd_cayley_table,
+            # 共役類の一覧
+            "ConjClass": self._cmd_conj_class,
+            # 共役類のカウント
+            "ConjCount": self._cmd_conj_count,
+            # 群同型
+            "Isomorphic": self._cmd_isomorphic,
+            # 可換群であるか
+            "IsAbelian": self._cmd_is_abelian,
+            # 完全群であるか
+            "IsPerfect": self._cmd_is_perfect,
+            # 可解群であるか
+            "IsSolvable": self._cmd_is_solvable,
+            # 単純群であるか
+            "IsSimple": self._cmd_is_simple,
+            # 中心
+            "Center": self._cmd_center,
+            # 中心化群
+            "Centrizer": self._cmd_centrizer,
+            # 導来部分群
+            "Derived": self._cmd_derived,
+            # 導来列
+            "DerivedSeries": self._cmd_derived_series,
+            # 正規部分群の一覧
+            "Normal": self._cmd_normal,
+            # 直積分解
+            "DirectDecompose": self._cmd_direct_decompose,
+            # 直積分解
+            "SemidirectDecompose": self._cmd_semidirect_decompose,
+            # 直積/半直積分解
+            "Decompose": self._cmd_decompose,
             }
         
     _errmsg_format = "書式が不適切です。"
@@ -138,6 +158,14 @@ class AppServise(object):
             "Name\tOrder\tIsomorphic\n"+
             f'{group.name}\t{group.order}\t{group.isomorphic}'
             )
+        text += "\n"
+        text += f'\nIsAbelian\t\t{group.is_abelian}'
+        text += f'\nIsPerfect\t\t{group.is_perfect}'
+        text += f'\nIsSimple\t\t{group.is_simple}'
+        text += f'\nIsSolvable\t\t{group.is_solvable}'
+        text += "\n\n分解パターン"
+        text += "\n\n" + self._cmd_direct_decompose(group)
+        text += "\n\n" + self._cmd_semidirect_decompose(group)
         return text
 
     def _cmd_elements(self, group):
@@ -248,28 +276,46 @@ class AppServise(object):
             text += f'\n{g.name}\t{g.order}\t{is_abelian}\t\t{g.isomorphic}'
         return text
     
-    def _cmd_decompose(self, group):
-        directList = group.direct_product
-        semiList = group.semidirect_product
+    def _cmd_direct_decompose(self, group):
+        direct_list = group.direct_product
         text = (
-            f'{group.name} の直積/半直積への分解：\n'+
+            f'{group.name} の直積への分解：\n'+
             "(\'x\' means \'\\times\')\n"+
-            "(\'r\' means \'\\rtimes\')\n"+
             "Name(Order)"
             )
-        for data in directList:
+        if not direct_list:
+            return text + "\n分解なし"
+        for data in direct_list:
             left = data.left
             right = data.right
             text += (
                 f'\n{left.name}({left.order}) x {right.name}({right.order})'+
-                f'\t<==> ( {left.isomorphic} ) × ( {right.isomorphic} )'
+                f'\t<==> ( {left.isomorphic} ) x ( {right.isomorphic} )'
                 )
-        for data in semiList:
+        return text
+    
+    def _cmd_semidirect_decompose(self, group):
+        semi_list = group.semidirect_product
+        text = (
+            f'{group.name} の半直積への分解：\n'+
+            "(\'r\' means \'\\rtimes\')\n"+
+            "Name(Order)"
+            )
+        if not semi_list:
+            return text + "\n分解なし"
+        for data in semi_list:
             left = data.left
             right = data.right
             text += (
                 f'\n{left.name}({left.order}) r {right.name}({right.order})'+
                 f'\t<==> ( {left.isomorphic} ) r ( {right.isomorphic} )')
+        return text
+
+    def _cmd_decompose(self, group):
+        text = f'{group.name} の分解：\n'
+        text += self._cmd_direct_decompose(group)
+        text += "\n\n"
+        text += self._cmd_semidirect_decompose(group)   
         return text
     
 class CmdExprPair(object):
