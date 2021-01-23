@@ -56,8 +56,8 @@ class AppServise(object):
     _errmsg_expr = "引数が不適切です。"
     _errmsg_exec = "プログラムエラー：実行時エラー"
     _errmsg_not_implemented = "プログラムエラー：未完成"
-    
-    def __init__(self, generators, zero_base, maximal):
+   
+    def __init__(self, generators, zero_base, maximal):             
         self._cmd_func_dict = self._create_cmd_func_dict()
         self._console_ctrl = ConsoleController()
         self._master = self._generate_master(generators, zero_base, maximal)
@@ -105,15 +105,14 @@ class AppServise(object):
             return self._errmsg_not_implemented
         except Exception:
             print(traceback.format_exc())
-            return self._errmsg_exec
+            return self._errmsg_exec      
     
     def _generate_master(self, generators, zero_base, maximal):
         """
         行列表示の生成元を与えて群を生成する。
         """
         ctrl = self._console_ctrl
-        # TODO:引数チェックを追加する
-        result = matcal.generate_group(generators, zero_base, maximal,ctrl)
+        result = matcal.generate_group(generators, zero_base, maximal, ctrl)
         if not result.has_value:
             raise Exception("閉じた群の生成に失敗しました。")
         result = matcal.calc_cayleytable(result.value, zero_base, ctrl)
