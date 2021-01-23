@@ -17,16 +17,17 @@ from application.service import AppServise
 # 生成元は numpy.array() で定義すること
 # 複素数も使用可能
 
-# gen1 = numpy.array([[1j,0,0],
-#                     [0,1,0],
-#                     [0,0,1]])
+gen1 = numpy.array([[1j,0,0],
+                    [0,1,0],
+                    [0,0,1]])
 
-# gen2 = numpy.array([[1,0,0],
-#                     [0,0,1j],
-#                     [0,1,0]])
+gen2 = numpy.array([[1,0,0],
+                    [0,0,1j],
+                    [0,1,0]])
 
 
-generators = NamedGroupGenerator.Delta_3n_2(6)
+#generators = NamedGroupGenerator.Delta_3n_2(6)
+#generators = NamedGroupGenerator.S_n(5)
 
 
 ####
@@ -35,7 +36,7 @@ generators = NamedGroupGenerator.Delta_3n_2(6)
 # 例えば, 生成元が 3個 ならば
 # generators = [gen1,gen2,gen3]
 
-#generators = [gen1,gen2]
+generators = [gen1,gen2]
 
 ####
 #### STEP3 群の位数の最大値[maximal]を決定する

@@ -15,6 +15,30 @@ class CartesianProduct(object):
     @property
     def group(self):
         return self._group
+       
+    @property
+    def is_direct_product(self) -> bool:
+        return self._product_type is ProductType.DIRECT
+    
+    @property
+    def is_semidirect_product(self) -> bool:
+        return self._product_type in {ProductType.LEFT, ProductType.RIGHT}
+    
+    @property
+    def is_left_semidirect_product(self) -> bool:
+        return self._product_type is ProductType.LEFT
+    
+    @property
+    def is_right_semidirect_product(self) -> bool:
+        return self._product_type is ProductType.RIGHT
+    
+    @property
+    def is_valid(self) -> bool:
+        return self._product_type is not ProductType.INVALID
+    
+    @property
+    def is_invalid(self) -> bool:
+        return self._product_type is ProductType.INVALID
     
     @staticmethod
     def create_direct(group):
@@ -37,24 +61,6 @@ class ProductType(Enum):
     LEFT = auto()
     RIGHT = auto()
     INVALID = auto()
-       
-    def is_direct_product(self) -> bool:
-        return self is ProductType.DIRECT
-    
-    def is_semidirect_product(self) -> bool:
-        return self in {ProductType.LEFT, ProductType.RIGHT}
-    
-    def is_left_semidirect_product(self) -> bool:
-        return self is ProductType.LEFT
-    
-    def is_right_semidirect_product(self) -> bool:
-        return self is ProductType.RIGHT
-    
-    def is_valid(self) -> bool:
-        return self is not ProductType.INVALID
-    
-    def is_invalid(self) -> bool:
-        return self is ProductType.INVALID
     
 class QuotientDecomposition(object):
     def __init__(self, is_valid, quotient):
