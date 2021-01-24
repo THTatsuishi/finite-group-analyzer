@@ -609,6 +609,7 @@ class Group(object):
         self._is_perfect = None
         self._is_solvable = None
         self._all_normalsub = None
+        self._normalizer = None
         self._is_simple = None
         self._isomorphic = None
         self._direct_product = None
@@ -891,6 +892,23 @@ class Group(object):
         if self._all_normalsub is None:
             self._all_normalsub = self._calc_all_normalsub()
         return self._all_normalsub
+    
+    @property
+    def normalizer(self) -> 'Group':
+        """
+
+        Returns
+        -------
+        Group
+            masterにおける群の正規化群
+            
+            備考:
+                群Gにおける群Sの正規化群とは, Sを共役不変に保つGの元の集合を指す.
+
+        """
+        if self._normalizer is None:
+            self._normalizer = self._calc_normalizer()
+        return self._normalizer
     
     @property
     def is_simple(self) -> bool:
@@ -1351,6 +1369,23 @@ class Group(object):
         group_set = {self.master.create_group(closure) for closure 
                      in normal_all}
         return tuple(sorted(group_set,reverse=True))
+    
+    def _calc_normalizer(self) -> 'Group':
+        """
+        正規化群を計算する。
+
+        Returns
+        -------
+        Group :
+            正規化群。
+
+        """
+        closure = []
+        for g in self.master.all_elements:
+            left = {self.master.index_prod(g, h) for h in self.elements}
+            right = {self.master.index_prod(h, g) for h in self.elements}
+            if left == right: closure.append(g)
+        return self.master.create_group(closure)   
     
     def _calc_is_simple(self) -> bool:
         """

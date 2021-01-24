@@ -33,7 +33,7 @@ class AppServise(object):
             "IsSimple": self._cmd_is_simple,
             # 可解群であるか
             "IsSolvable": self._cmd_is_solvable,
-            # 中心
+            # 群の中心
             "Center": self._cmd_center,
             # 中心化群
             "Centralizer": self._cmd_centralizer,
@@ -43,6 +43,8 @@ class AppServise(object):
             "DerivedSeries": self._cmd_derived_series,
             # 正規部分群の一覧
             "Normal": self._cmd_normal,
+            # 正規化群
+            "Normalizer": self._cmd_normalzer,
             # 直積分解
             "DirectDecompose": self._cmd_direct_decompose,
             # 直積分解
@@ -62,10 +64,12 @@ class AppServise(object):
         self._console_ctrl = ConsoleController()
         self._master = self._generate_master(generators, zero_base, maximal)
         maximal = self._master.maximal_group
+        trivial = self._master.trivial_group
         self._console_ctrl.message(
             "\n以下の群を生成しました:\n"+
-            "Name\tOrder\n"+
-            f'{maximal.name}\t{maximal.order}'
+            "Name\tOrder\tIsomorphic"+
+            f'\n{maximal.name}\t{maximal.order}\t{maximal.isomorphic}'+
+            f'\n{trivial.name}\t{trivial.order}\t{trivial.isomorphic}'
             )
         self._app_window = AppWindow(self._exec_cmd)
     
@@ -126,9 +130,9 @@ class AppServise(object):
         """
         作成された群の一覧を表す文字列を作成する。
         """
-        text = "作成された群の一覧：\nName\tOrder"
+        text = "作成された群の一覧：\nName\tOrder\tIsomorphic"
         for group in self._master.all_groups:
-            text += f'\n{group.name}\t{group.order}'
+            text += f'\n{group.name}\t{group.order}\t{group.isomorphic}'
         return text
     
     def _divide_command_expr(self, cmd_text):
@@ -238,8 +242,9 @@ class AppServise(object):
     
     def _cmd_centralizer(self, group):
         centralizer = group.centralizer
+        maximal = self._master.maximal_group
         text = (
-            f'{group.name} の中心化群：\n'+
+            f'{maximal.name} における {group.name} の中心化群：\n'+
             "Name\tOrder\tIsomorphic\n"+
             f'{centralizer.name}\t{centralizer.order}\t{centralizer.isomorphic}'
             )
@@ -273,6 +278,16 @@ class AppServise(object):
         for g in normals:
             is_abelian = 'Abelian'if g.is_abelian else 'non'
             text += f'\n{g.name}\t{g.order}\t{is_abelian}\t\t{g.isomorphic}'
+        return text
+    
+    def _cmd_normalzer(self, group):
+        normalizer = group.normalizer
+        maximal = self._master.maximal_group
+        text = (
+            f'{maximal.name} における {group.name} の正規化群：\n'+
+            "Name\tOrder\tIsomorphic\n"+
+            f'{normalizer.name}\t{normalizer.order}\t{normalizer.isomorphic}'
+            )
         return text
     
     def _cmd_direct_decompose(self, group):

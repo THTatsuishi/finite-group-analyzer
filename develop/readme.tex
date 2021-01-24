@@ -39,7 +39,7 @@
 利用にはPython 3.x の実行環境, および標準ライブラリが必要となります.
 Pythonの実行環境は各自で用意してください.
 
-本プログラムは, 使用するにあたりPythonのソースコードをユーザー自身が編集する必要があります.
+本プログラムは, 使用するにあたりPythonのソースコードを（数行程度）ユーザー自身が編集する必要があります.
 そのため, Pythonのコードを書くための基本的な知識, および数値計算用ライブラリNumPyの知識が必要となります.
 知識の目安としては, 3次程度の複素正方行列を記述できれば十分です.
 
@@ -64,10 +64,10 @@ Pythonの実行環境は各自で用意してください.
 共役類, 可換性, 群の中心, 正規部分群, 群同型など.
 \item 生成された群の直積分解や半直積分解を調べる.
 \end{itemize}
-本プログラムでは, 初めに行列で与えられた生成元から群を生成し, 群の乗積表を作成します.
+本プログラムでは, 初めに行列表現で与えられた生成元から群を生成し, 群の乗積表を作成します.
 この計算過程では, 行列演算を繰り返すため, 行列のサイズや群の位数に応じた計算時間がかかります.
 乗積表の作成後は, 行列表現された元をナンバリングして整数に置き換えて乗積表に従った演算を行うことで, 極めて高速な計算を実現しています.
-基本的に, 解析画面上での行う計算はほとんど一瞬で完了します.
+基本的に, 解析画面上での行う計算は短時間で完了します.
 
 \subsection{具体的な使用手順}
 \begin{enumerate}
@@ -80,16 +80,17 @@ Pythonの実行環境は各自で用意してください.
 \item 起点ファイルのソースコードを編集する. \\
 ソースコード内の説明に従い, 以下の値を設定する.
 	\begin{itemize}
-	\item 生成元となる行列を一つ以上
-	\item 「有限では閉じない」と判定するための要素数の上限値
-	\item 浮動小数点の計算誤差を補正するための許容誤差（基本的に編集不要）
+	\item 生成元となる行列を一つ以上.
+	\item 「有限では閉じない」と判定するための要素数の上限値.
+	\item 浮動小数点の計算誤差を補正するための許容誤差（基本的に編集不要）.
 	\end{itemize}
 \item 起点ファイルを実行する. \\
-→ 有限群が正しく生成されない場合はエラーが生じる.
+→ 有限群が正しく生成されない場合はエラーが発生する.
 	\begin{itemize}
-	\item Pythonのコードの書き方が誤っている（特にインデントに注意せよ）
-	\item 群が有限で閉じない
+	\item Pythonのコードの書き方が誤っている（特にインデントに注意せよ）.
+	\item 群が有限で閉じない.
 	\end{itemize}
+エラーの発生原因を解消して, 再度起点ファイルを実行する.
 \item 群が正しく生成された場合, 解析用画面が開く. \\
 以降操作は解析画面上で行う.
 \item 解析画面のコマンド入力欄に解析用のコマンドを入力する.
@@ -119,11 +120,12 @@ Command[group]の形式をとり, ``group''で指定された群に関する処�
 
 \paragraph{Element[group]}
 群の要素を表示する.
+行列表現ではなく, 元ナンバリングした整数の一覧が表示される.
 
 \paragraph{Table[group]}
 群の乗積表を表示する.
-ただし, 位数が大きい場合には一部のみを表示する.
 単位元は必ず``0''となる.
+位数が大きい場合には一部のみが表示されるため, 現状ではあまり役に立たない.
 
 \paragraph{ConjClass[group]}
 群の共役類（位数, 要素数, 要素）の一覧を表示する.
@@ -149,8 +151,11 @@ Command[group]の形式をとり, ``group''で指定された群に関する処�
 \paragraph{Center[group]}
 群の中心を表示する.
 
-\paragraph{Centrizer[group]}
+\paragraph{Centralizer[group]}
 masterにおける群の中心化群を表示する.
+
+\paragraph{Normalizer[group]}
+masterにおける群の正規化群を表示する.
 
 \paragraph{Derived[group]}
 群の導来部分群を表示する.
@@ -184,9 +189,6 @@ masterにおける群の中心化群を表示する.
 
 \subsection{未実装（実装を検討中）}
 
-\paragraph{Normalizer[group]}
-masterにおける群の正規化群を表示する.
-
 \paragraph{Subgroup[group]}
 群の部分群を表示する.
 ただし, 部分群はmasterの元による共役変換の範囲で一意である.
@@ -211,12 +213,12 @@ masterにおける群の正規化群を表示する.
 \end{itemize}
 
 \subsection{位数}
-\subsubsection{群の位数}
+\subsubsection{群の位数(order)}
 群の要素数を指す.
 群$G$の部分群を$H \subset G$とすると, \uline{$H$の位数は$G$の位数の約数である}.
 よって, 位数が素数である群には非自明な部分群が存在しない.
 
-\subsubsection{群の元の位数}
+\subsubsection{群の元の位数(order)}
 群$G$の元$g\in G$に対して,
 \begin{equation}
 	g^n = e,\quad n\in\mathbb{N}_+
@@ -239,78 +241,117 @@ $h$による$g$の共役変換を
 となる$h\in G$が存在するとき, $g$と$g'$は共役であるという. 
 単位元は任意の共役変換で単位元へと写されるため, 単位元と共役な元は単位元のみである.
 
-\subsubsection{共役類}
+\subsubsection{共役類(conjugacy class)}
 互いに共役である元からなる集合を指す.
 
 \paragraph{共役類の元は位数が等しい}
 群Gの元を$a,b,g \in G$とし, $ b = gag^{-1}とする.$
 $a$の位数を$n\in\mathbb{N}_+$とする.
 \begin{equation}
- b^n = (gag^{-1})^n = ga^{n}g = geg^{-1} = e
+ b^n = (gag^{-1})^n = ga^{n}g^{-1} = geg^{-1} = e
 \end{equation}
 である
 
 \begin{itemize}
 \item 共役類の要素数は群の位数の約数である.
 \item 異なる共役類は共通部分を持たない. \\
-群Gの任意の共役類$C_1, C_2$に対して$C_1 \cup C_2 = \emptyset$.
+群Gの任意の共役類$C_1, C_2$に対して$C_1 \cap C_2 = \emptyset$.
 \item 群は, 共役類の共通部分のない和集合として分解される. \\
 群Gの共役類を$C_1,\dots,C_n$, $n\in\mathbb{N}_+$とすると, $G = C_1 \cup \cdots \cup C_n$.
 \item 単位元は自身のみで共役類を構成する.
-\item 可換群は, 全ての元が自身のみで共役類を構成する.
+\item 可換群であることと, 全ての元が自身のみで共役類を構成することは, 等価である.
 \end{itemize}
 これらより, 位数が素数の群は可換群である.
 さらに, \uline{その群は巡回群である}.
 
-\subsubsection{共役類のカウント}
-※極めて重要
-
 \subsection{群の中心}
-\subsubsection{中心}
-群$G$の中心$Z(G)$を, $G$の任意の元と可換である元の集合
+\subsubsection{中心(center)}
+群$G$の中心$Z(G)$とは, $G$の任意の元と可換である元の集合
 \begin{equation}
-Z(G) = \{z \in G | zg = gz \left(g \in G\right)\}
+Z(G) \equiv \{ z \in G | zg = gz \text{ for all } g \in G \}
 \end{equation}
-とする.
+である.
 $Z(G)$は群をなす.
 
-\subsubsection{中心化群}
+\subsubsection{中心化群(centralizer)}
+群$G$の部分群を$S \subset G$とする.
+$G$における$S$の中心化群$C_G(S)$とは, $S$の全ての元と可換$G$の元全体
+\begin{equation}
+	C_G(S) \equiv \{ g \in G | gs = sg \text{ for all } s \in S \}
+\end{equation}
+である.
+$C_G(S)$は群をなす.
+\begin{equation}
+	C_G(G) = Z(G),\quad C_G(Z_1) = G
+\end{equation}
+である.
 
 \subsection{正規部分群}
-\subsubsection{正規部分群}
-正規部分群として自明な正規部分群のみを持つ群を指す.
+\subsubsection{正規部分群(normal subgroup)}
+群$G$の部分群を$N \subset G$とする.
+$N$が$G$の正規部分群であるとは, 任意の$n \in N$, $g \in G$に対して
+\begin{equation}
+	g n g^{-1} \in N
+\end{equation}
+を満たすことをいう.
+$N$が$G$の正規部分であることを, $N \triangleleft G$, あるいは$G \triangleright N$と表す.
+これは, $N$が$G$において集合として共役不変であることを表す.
+つまり,
+\begin{equation}
+	gN = Ng \text{ for all } g \in G
+\end{equation}
+である.
 
-\subsubsection{正規化群}
+群$G$に対して, $G$自身, および自明群は$G$の正規部分群である.
+これら, 群自身と自明群を自明な正規部分群と呼ぶ.
+正規部分群として自明な正規部分群のみを持つ群を単純群(simple group)と呼ぶ.
+
+\uline{$G$の正規部分群は$G$の共役類の和集合である}.
+
+\subsubsection{正規化群(normalizer)}
+群$G$の部分群を$S \in G$とする.
+$G$における$S$の正規化群$N_G(S)$とは, $S$を共役変換で不変に保つ$G$の元の集合
+\begin{equation}
+	N_G(S) \equiv \{ g \in G | gS = Sg \}
+\end{equation}
+である.
+$N_G(S)$は群をなす.
+$S \triangleleft N_G(S)$である.
+\begin{equation}
+	N_G(G) = N_G(Z_1) = G
+\end{equation}
+である.
 
 \subsection{導来部分群}
-\subsubsection{交換子}
-群$G$の元$g,h \in G$の交換子$[g,h]$を
+\subsubsection{交換子(commutator)}
+群$G$の元$g,h \in G$の交換子$[g,h]$とは
 \begin{equation}
 	[g, h] \equiv g h g^{-1} h^{-1}
 \end{equation}
-とする.
+である.
 $g,h$が可換であるとき, 
 \begin{equation}
 	[g, h] = e
 \end{equation}
 となる.
 
-\subsubsection{導来部分群}
-交換子部分群とも呼ばれる.
-群$G$の導来部分群$[G,G]$を, $G$の交換し全体を生成系として生成される群
+\subsubsection{導来部分群(derived subgroup)}
+交換子部分群(commutator subgroup)とも呼ばれる.
+群$G$の導来部分群$[G,G]$とは, $G$の交換子全体を生成系として生成される群
 \begin{equation}
-	[G, G] \equiv \langle \{ [g,h] | g,h \in G\} \rangle
+	[G, G] \equiv \langle \{ [g,h] | g,h \in G \} \rangle
 \end{equation}
-とする.
+である.
+交換子部分群は正規部分群
 \begin{equation}
 	[G, G] \triangleleft G
 \end{equation}
 である.
-交換子部分群が自明群である群を可換群と呼ぶ.
-交換子部分群が自身と一致する群を完全群と呼ぶ.
+交換子部分群が自明群である群を可換群(abelian group), そうでない群を非可換群(non-abelian group)と呼ぶ.
+交換子部分群が自身と一致する群を完全群(perfect group)と呼ぶ.
 
 
-\subsubsection{導来列}
+\subsubsection{導来列(derived series)}
 群$G$自身を0次導来部分群, $[G,G]$を一次導来部分群とし, $n$次導来部分群の導来部分群を$(n+1)$次導来部分群と呼ぶ.
 $G$の$n$次導来部分群を$G^{(n)}$として表す.
 \begin{equation}
@@ -327,9 +368,12 @@ $n\in\mathbb{N}$を$G^{(n)}$が完全群となる最小の値とする.
 G^{(n)} \triangleleft \dots \triangleleft G^{(1)} \triangleleft G^{(0)}
 \end{equation}
 を$G$の導来列と呼ぶ.
-導来列が自明群で終わる群を可解群と呼ぶ.
+導来列が自明群で終わる群を可解群(solvable group)と呼ぶ.
 
-
+%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%
+\newpage
+\section{処理の概要}
+ここでは, プログラム中で行っている処理の概要を示す.
 
 
 
