@@ -602,7 +602,7 @@ class Group(object):
         self._conjugacy_classes = None
         self._conjugacy_count = None
         self._center = None
-        self._centrizer = None
+        self._centralizer = None
         self._derived = None
         self._derived_series = None
         self._is_abelian = None
@@ -744,7 +744,7 @@ class Group(object):
         return self._center   
 
     @property
-    def centrizer(self) -> 'Group':
+    def centralizer(self) -> 'Group':
         """
 
         Returns
@@ -757,9 +757,9 @@ class Group(object):
             この集合は群をなす。
 
         """
-        if self._centrizer is None:
-            self._centrizer = self._calc_centrizer()
-        return self._centrizer 
+        if self._centralizer is None:
+            self._centralizer = self._calc_centralizer()
+        return self._centralizer 
     
     @property
     def derived(self) -> 'Group':
@@ -1261,7 +1261,7 @@ class Group(object):
                           for h in self.elements)}
         return self.master.create_group(closure)
     
-    def _calc_centrizer(self) -> 'Group':
+    def _calc_centralizer(self) -> 'Group':
         """
         MasterGroupに対するこの群の中心化群を計算する。
 

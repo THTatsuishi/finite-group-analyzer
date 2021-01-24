@@ -36,7 +36,7 @@ class AppServise(object):
             # 中心
             "Center": self._cmd_center,
             # 中心化群
-            "Centrizer": self._cmd_centrizer,
+            "Centralizer": self._cmd_centralizer,
             # 導来部分群
             "Derived": self._cmd_derived,
             # 導来列
@@ -236,12 +236,12 @@ class AppServise(object):
             )
         return text
     
-    def _cmd_centrizer(self, group):
-        centrizer = group.centrizer
+    def _cmd_centralizer(self, group):
+        centralizer = group.centralizer
         text = (
             f'{group.name} の中心化群：\n'+
             "Name\tOrder\tIsomorphic\n"+
-            f'{centrizer.name}\t{centrizer.order}\t{centrizer.isomorphic}'
+            f'{centralizer.name}\t{centralizer.order}\t{centralizer.isomorphic}'
             )
         return text
     
