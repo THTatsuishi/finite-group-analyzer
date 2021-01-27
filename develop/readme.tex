@@ -17,7 +17,8 @@
 \newcommand{\Slash}[1]{{\ooalign{\hfil/\hfil\crcr$#1$}}}		%\Slash{--}
 %-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%-----%
 \title{
-有限群解析プログラム
+有限群解析プログラム\\
+※全体的に加筆中
 }
 \author{
 作製: 立石卓也
@@ -347,7 +348,7 @@ $g,h$が可換であるとき,
 	[G, G] \triangleleft G
 \end{equation}
 である.
-交換子部分群が自明群である群を可換群(abelian group), そうでない群を非可換群(non-abelian group)と呼ぶ.
+交換子部分群が自明群である群を可換群(Abelian group), そうでない群を非可換群(non-Abelian group)と呼ぶ.
 交換子部分群が自身と一致する群を完全群(perfect group)と呼ぶ.
 
 
@@ -375,7 +376,53 @@ G^{(n)} \triangleleft \dots \triangleleft G^{(1)} \triangleleft G^{(0)}
 \section{処理の概要}
 ここでは, プログラム中で行っている処理の概要を示す.
 
+\subsection{群の生成}
+ユーザーが行列表示で指定する生成元を$n$個とし, 生成系を
+\begin{equation}
+	G = \{g_1, g_2, \dots, g_n \}
+\end{equation}
+とする.
+また, 生成された元の第0世代の集合として, $H_0=G$とする.
+第1世代の集合$H_1$を
+\begin{equation}
+	H_1 = \{ hg | h \in H_0, g \in G\} - H_0
+\end{equation}
+とする.
+$H_1$の要素数が0でないとき, 第2世代$N_2$を
+\begin{equation}
+	H_2 = \{ hg | h \in H_1, g \in G\} - (H_0 \cup H_1)
+\end{equation}
+とする.
+この操作を繰り返し, 一般に第$n$世代の要素数がでないとき, 第$(n+1)$世代$N_{n+1}$を
+\begin{equation}
+	H_{n+1} = \{ hg | h \in H_n, g \in G\} - \bigcup_{i=0}^n H_i
+\end{equation}
+とする.
+この操作を, 要素数が0となる世代が現れるまで続ける.
 
+\subsection{乗積表の作成}
+生成された群を$G$, 位数を$n$とする.
+$g_i,g_j \in G$に対して
+\begin{equation}
+	g_i g_j = g_k
+\end{equation}
+となる$g_k \in G$を見つける.
+続いて, 元をナンバリングして$\{0,1,\dots,n-1\}$とし, $i \cdot j = k$となる$i,j,k$に対して$T_{ij}=k$となる行列$T$を作成する.
+この, 乗積表に対応する整数値行列$T$を計算しておくことで, 今後の元の演算において複素行列の計算をする必要がなくなる.
+また, 計算効率化のために, $g_i^{-1}=g_j$に対して$I_i = j$となる逆元対応ベクトル$I$や, $g_jg_ig_j^{-1}=g_k$に対して$C_{ij}=k$となる共役変換行列$C$を作成している.
+
+\subsection{共役類の計算}
+群$G$に対して$G_0 = G$とし, $a \in G_0$を任意に一つ選び, 一つ目の共役類$C_1$を
+\begin{equation}
+	C_1 = \{ g a g^{-1} | g \in G_0\}
+\end{equation}
+とする.
+続いて, 集合$G_1=G_0-C_1$に対して$a \in G_1$を任意に一つ選び, 二つ目の共役類$C_2$を
+\begin{equation}
+	C_2 = \{ g a g^{-1} | g \in G_1\}
+\end{equation}
+とする.
+この操作を繰り返す.
 
 
 
