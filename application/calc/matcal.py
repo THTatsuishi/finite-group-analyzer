@@ -302,7 +302,7 @@ class GenerateGroupResult(object):
     """
     def __init__(self, matlist: 'list[numpy.ndarray]' = None):
         self.has_value = True if matlist is not None else False
-        self.value = tuple(matlist)
+        self.value = tuple(matlist) if matlist is not None else None
         
 class CalcCayleyTableResult(object):
     """

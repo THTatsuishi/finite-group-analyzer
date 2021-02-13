@@ -6,6 +6,7 @@ from application.controller import ConsoleController
 from application.calc import matcal
 from application.calc.group import MasterGroup
 from application.view import AppWindow
+from application.exceptions import GenerateGroupError
 
 class AppServise(object):
     def _create_cmd_func_dict(self):
@@ -62,7 +63,14 @@ class AppServise(object):
     def __init__(self, generators, zero_base, maximal):             
         self._cmd_func_dict = self._create_cmd_func_dict()
         self._console_ctrl = ConsoleController()
-        self._master = self._generate_master(generators, zero_base, maximal)
+        # 群の生成を実行
+        result = self._generate_master(generators, zero_base, maximal)
+        # 失敗なら終了
+        if not result.has_value:
+            self._is_succeeded = False
+            return
+        self._is_succeeded = True
+        self._master = result.master
         maximal = self._master.maximal_group
         trivial = self._master.trivial_group
         self._console_ctrl.message(
@@ -74,6 +82,9 @@ class AppServise(object):
         self._app_window = AppWindow(self._exec_cmd)
     
     def __call__(self):
+        # 群の生成に失敗したにもかかわらずアクセスした場合
+        if not self.is_succeeded:
+            raise GenerateGroupError("群の生成に失敗しています。")
         self._console_ctrl.message(
             "\n解析画面を開きました。\n"+
             "以降は解析画面上で操作してください。"
@@ -84,7 +95,11 @@ class AppServise(object):
             "\n解析画面を閉じました。\n"+
             "再び解析画面を開くには、コンソールに app() と入力して実行してください。"
             )
-        
+    
+    @property
+    def is_succeeded(self):
+        return self._is_succeeded
+    
     def _exec_cmd(self, cmd_text):
         """
         解析画面上に入力されたコマンドを実行する。
@@ -118,13 +133,13 @@ class AppServise(object):
         ctrl = self._console_ctrl
         result = matcal.generate_group(generators, zero_base, maximal, ctrl)
         if not result.has_value:
-            raise Exception("閉じた群の生成に失敗しました。")
+            return GenerateMasterResult.create_failed()
         result = matcal.calc_cayleytable(result.value, zero_base, ctrl)
         if not result.has_value:
-            raise Exception("乗積表の作成に失敗しました。")
+            return GenerateMasterResult.create_failed()
         master = MasterGroup(result.value)
         master.group_initial  = "g"
-        return master
+        return GenerateMasterResult.create_succeeded(master)
     
     def _create_text_ini(self) -> str:
         """
@@ -142,10 +157,10 @@ class AppServise(object):
         ini = cmd_text.find("[")
         fin = cmd_text.rfind("]")
         if not 0 <= ini < fin == (len(cmd_text)-1): 
-            return CmdExprPair.CreateFailed()
+            return CmdExprPair.create_failed()
         cmd = cmd_text[0:ini]
         expr = cmd_text[ini+1:fin]
-        return CmdExprPair.CreateSucceeded(cmd,expr)
+        return CmdExprPair.create_succeeded(cmd,expr)
             
     def _cmd_to_func(self, cmd: str):
         if not cmd in self._cmd_func_dict:
@@ -351,11 +366,11 @@ class CmdExprPair(object):
         return self._expr
     
     @staticmethod
-    def CreateSucceeded(cmd: str, expr: str):
+    def create_succeeded(cmd: str, expr: str):
         return CmdExprPair(True,cmd,expr)
     
     @staticmethod
-    def CreateFailed():
+    def create_failed():
         return CmdExprPair(False,None,None)
 
 class CmdResult(object):
@@ -372,9 +387,30 @@ class CmdResult(object):
         return self._text
     
     @staticmethod
-    def CreateSucceeded(text: str):
+    def create_succeeded(text: str):
         return CmdResult(True,text)
     
     @staticmethod
-    def CreateFailed():
+    def create_failed():
         return CmdResult(False,None)
+    
+class GenerateMasterResult(object):
+    def __init__(self, has_value: bool, master: "MasterGroup"):
+        self._has_value = has_value
+        self._master = master
+    
+    @property
+    def has_value(self):
+        return self._has_value
+    
+    @property
+    def master(self):
+        return self._master
+    
+    @staticmethod
+    def create_succeeded(master: "MasterGroup"):
+        return GenerateMasterResult(True, master)
+    
+    @staticmethod
+    def create_failed():
+        return GenerateMasterResult(False, None)

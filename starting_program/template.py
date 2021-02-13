@@ -51,5 +51,6 @@ zero_base = 0.0001
 
 # 群の生成を実行
 app = AppServise(generators, zero_base, maximal)
-# 解析画面を開く
-app()
+# 生成成功なら解析画面を開く
+if app.is_succeeded:
+    app()
